@@ -1,0 +1,35 @@
+const errorEnum = {
+    db_connection_error: "-99",
+    invalid_data: "1000",
+    invalid_import: "1001",
+    invalid_project: "1002",
+    invalid_session: "1003",
+    invalid_web3_provider: "1004",
+    invalid_transaction: "1005",
+    invalid_contract_path: "1006",
+    invalid_input_metadata: "1007",
+    invalid_contract: "1008",
+    not_owned: "1009",
+    email_already_exists: "1010",
+    email_already_verified: "1011",
+    email_token_expired: "1012",
+    invalid_code_verification: "1013",
+    invalid_username_and_password: "1014",
+    invalid_email: "1015",
+    session_token_expired: "1016",
+    invalid_phone_number: "1017",
+    invalid_password: "1018",
+    invalid_webhook_url: "1019",
+    invalid_log_event: "1020",
+    invalid_webkook_id: "1021",
+    webhook_already_exists: "1022",
+    contract_not_exists: "1023",
+    webhook_not_exists: "1024",
+    invalid_array_event: "1025",
+    unexpected_error: "1026",
+    customers_not_exists: "1027",
+};
+
+module.exports = {
+    errorEnum
+};
