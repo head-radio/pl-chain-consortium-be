@@ -51,6 +51,12 @@ Open [http://localhost:3000/v1/api-docs/](http://localhost:3000/v1/api-docs/) an
 
 You need to configure your locally DynamoDB following the **Official Documentation** [https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.html](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.html)
 
+After running DynamoDB locally, execute the commando below to create the customer table:
+
+```bash
+aws dynamodb --endpoint-url http://localhost:8000 --region eu-south-1 create-table --table-name pl-chain-customers --attribute-definitions AttributeName=email,AttributeType=S --key-schema AttributeName=email,KeyType=HASH --provisioned-throughput ReadCapacityUnits=1,WriteCapacityUnits=1
+```
+
 ## Local configuration
 
 Open `.env` and inject your local environment variables
@@ -110,7 +116,9 @@ You need also configure your env variables contained in **env.development.json**
 
 The **AWS CLI** command to create secret is
 
+```bash
 aws secretsmanager create-secret --name prod/pl-chain-consortium/secrets --secret-string file://secrets.json
+```
 
 The content of secrets.json file is
 
