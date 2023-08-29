@@ -11,10 +11,6 @@ The app demonstrates how can we use the blockchain to create a consortium.
 
 You can see the backend API on <a href="https://api-consortium.pl-chain.com/v1/api-docs/" target="_blank">pl-chain consortium API</a>.
 
-## What is pl-chain-consortium?
-
-[Contentful](https://www.contentful.com) provides a content infrastructure for digital teams to power content in websites, apps, and devices. Unlike a CMS, Contentful was built to integrate with the modern software stack. It offers a central hub for structured content, powerful management and delivery APIs, and a customizable web app that enable developers and content creators to ship digital products faster.
-
 ## Requirements
 
 * Git
