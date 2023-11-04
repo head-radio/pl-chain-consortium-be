@@ -33,10 +33,10 @@ const getProperty = async (input) => {
 
   let value
 
-  console.log('> start getProperty for input: ' + input)
-  console.log('> process.env.NODE_ENV: ' + process.env.NODE_ENV)
-  console.log('> process.env.SECRETS_NAME: ' + process.env.SECRETS_NAME)
-  console.log('> process.env.REGION: ' + process.env.REGION)
+  console.log('> start getProperty for input: ' + input
+    + ' > process.env.NODE_ENV: ' + process.env.NODE_ENV
+    + ' > process.env.SECRETS_NAME: ' + process.env.SECRETS_NAME
+    + ' > process.env.REGION: ' + process.env.REGION)
 
   if (process.env.NODE_ENV == 'local' || process.env.NODE_ENV == 'test') {
     value = process.env[input]

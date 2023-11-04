@@ -160,6 +160,26 @@ const deleteCustomers = async (req, res) => {
 
 };
 
+const getUserBalance = async (req, res) => {
+
+    // #swagger.tags = ['Customers']
+    // #swagger.description = 'Get Users Balance Info API.'
+
+    console.log("getUserBalance with " + req.user.email)
+
+    try {
+        let response = await customersService.getUserBalance(req.user)
+        res.status(response.status).json(response.body)
+    } catch (exception) {
+        res.status(exception.status).send({
+            error_code: exception.error_code,
+            message: exception.message,
+        });
+    }
+
+}
+
+
 module.exports = {
     verifyEmailAddress,
     validateEmailAndRegisterUser,
@@ -169,4 +189,5 @@ module.exports = {
     getUser,
     updateUser,
     deleteCustomers,
+    getUserBalance
 };

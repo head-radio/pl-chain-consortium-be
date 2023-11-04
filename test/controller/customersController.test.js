@@ -8,7 +8,8 @@ const {
     getUser,
     resetPassword,
     resetPasswordConfirm,
-    login
+    login,
+    getUserBalance
 } = require('../../controller/customersController');
 
 customersService.verifyEmailAddressAndSendEmail = jest.fn()
@@ -19,6 +20,7 @@ customersService.updateUser = jest.fn()
 customersService.deleteCustomers = jest.fn()
 customersService.getUser = jest.fn()
 customersService.login = jest.fn()
+customersService.getUserBalance = jest.fn()
 
 describe('customersController', () => {
 
@@ -217,6 +219,34 @@ describe('customersController', () => {
         await getUser(mockReq, mockRes);
 
         expect(customersService.getUser).toHaveBeenCalledWith(mockReq.user);
+        expect(mockRes.status).toHaveBeenCalledWith(mockResponse.status);
+    });
+
+    it('should get user balance infos', async () => {
+        const mockReq = {
+            user: {
+                email: 'test@example.com',
+            },
+        };
+
+        const mockRes = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+            send: jest.fn(),
+        };
+
+        const mockResponse = {
+            status: 200,
+            body: {
+                "tuple-0": "50"
+              },
+        };
+
+        customersService.getUserBalance.mockResolvedValue(mockResponse);
+
+        await getUserBalance(mockReq, mockRes);
+
+        expect(customersService.getUserBalance).toHaveBeenCalledWith(mockReq.user);
         expect(mockRes.status).toHaveBeenCalledWith(mockResponse.status);
     });
 

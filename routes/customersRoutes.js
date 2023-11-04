@@ -9,6 +9,7 @@ const {
     getUser,
     updateUser,
     deleteCustomers,
+    getUserBalance
 } = require('../controller/customersController');
 
 const {
@@ -23,6 +24,7 @@ router.post('/customers/reset-password', resetPassword);
 router.put('/customers/reset-password', resetPasswordConfirm);
 router.post('/customers/login', login);
 router.get('/customers', isAuth, getUser);
+router.get('/customers/balance', isAuth, getUserBalance);
 router.put('/customers', isAuth, updateUser);
 router.delete('/customers', isAuth, deleteCustomers)
 

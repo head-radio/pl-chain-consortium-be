@@ -7,7 +7,8 @@ const {
     login,
     getUser,
     updateUser,
-    deleteCustomers
+    deleteCustomers,
+    getUserBalance
 } = require('../../service/customersService');
 const dynamoDBService = require('../../service/dynamoDBService');
 const bcrypt = require('bcryptjs');
@@ -18,6 +19,11 @@ dynamoDBService.getCustomers = jest.fn()
 dynamoDBService.insertCustomers = jest.fn()
 dynamoDBService.deleteCustomers = jest.fn()
 auth.sendEmail = jest.fn()
+
+const plChainService = require('../../service/PlChainService')
+const MockAdapter = require('axios-mock-adapter');
+const axios = require('axios');
+const mockAxios = new MockAdapter(axios);
 
 describe('customersService', () => {
 
@@ -127,7 +133,8 @@ describe('customersService', () => {
 
     });
 
-    it('should validate email and register user', async () => {
+    //npm test -- customersService -t abstraction
+    it('should validate email and register user and create account abstraction', async () => {
         const mockReq = {
             email: 'test@example.com',
             codeVerification: 123456
@@ -160,6 +167,80 @@ describe('customersService', () => {
         });
 
         dynamoDBService.insertCustomers.mockResolvedValue();
+
+        const createAccountAbstractionResponse = {
+            body: {
+                walletId: "11152483e7817391ff67d82cd03e5b63",
+                address: "0x268DBF3079139106da490F816B30a47E04d0b523",
+                privateKey: "0xbf79bd315046f57ca7c0731210e1b20a79aee575ca2c129636118a36b30fb43e",
+                mnemonic: {
+                    phrase: "urban still stage aerobic alone differ funny vague length today pitch couple",
+                    path: "m/44'/60'/0'/0/0",
+                    locale: "en"
+                },
+                aaAddres: "0x39E78606860c8395428551487BbE59248D262082",
+                web3ProviderCode: "POL_TEST",
+                contractId: "4375dfbbdaff556d6f99a5cf",
+                projectId: "679ce380c4595d54f7c82a87d3274f8b",
+                email: "xxxx@gmail.com"
+            },
+            status: 200,
+        };
+
+        // Mock the Axios POST request
+        mockAxios.onPost().reply(200, createAccountAbstractionResponse);
+
+        let response = await validateEmailAndRegisterUser(mockReq, mockRes);
+
+        expect(expectedResponse).toEqual(response)
+    });
+
+    //npm test -- customersService -t abstraction
+    it('should validate email and register user and create account abstraction error', async () => {
+        const mockReq = {
+            email: 'test@example.com',
+            codeVerification: 123456
+        };
+
+        const mockRes = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+            send: jest.fn(),
+        };
+
+        const mockGetCustomers = {
+            ...mockReq,
+            password: 'fuckedpwd'
+        };
+
+        const tokenVerification = await auth.tokenForVerify(mockGetCustomers);
+
+        let expectedResponse = {
+            status: 400,
+            body: {
+                success: false,
+                message: 'Error during account abstraction creation.'
+            }
+        }
+
+        dynamoDBService.getCustomers.mockResolvedValue({
+            ...mockGetCustomers,
+            tokenVerification: tokenVerification
+        });
+
+        dynamoDBService.insertCustomers.mockResolvedValue();
+
+        ///////////////////////////////////
+
+        const createAccountAbstractionResponse = {
+            body: {},
+            status: 400,
+        };
+
+        // Mock the Axios POST request
+        mockAxios.onPost().reply(400, createAccountAbstractionResponse);
+
+        ///////////////////////////
 
         let response = await validateEmailAndRegisterUser(mockReq, mockRes);
 
@@ -550,6 +631,9 @@ describe('customersService', () => {
         const mockGetCustomers = {
             email: 'test@example.com',
             password: bcrypt.hashSync(mockReq.password),
+            accountAbstraction : {
+                aaAddres:"0Xer64e6wr54tete6w"
+            }
         };
 
         let expectedResponse = {
@@ -717,6 +801,58 @@ describe('customersService', () => {
 
         expect(dynamoDBService.getCustomers).toHaveBeenCalledWith(mockReq);
         expect(expectedResponse).toEqual(response)
+
+    });
+
+    //npm test -- customersService -t balance
+    it('should get user info balance', async () => {
+
+        const mockReq = {
+            email: 'test@example.com',
+        };
+
+        const mockRes = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+            send: jest.fn(),
+        };
+
+        const mockGetCustomers = {
+            isActive: true,
+            password: "$2a$10$v5jqTDuXag5pw0EwiKzV8ewkqM8x8J9BSSl2zMPRUFk.bKeZorQ0u",
+            createdAt: "2023-11-04 10:59:24",
+            accountAbstraction: {
+                walletId: "1a459690ac067b7a1ada813dd3356383",
+                privateKey: "0x2f0da9284853c5bec5d986718c0482e95627f4876b9962b45cd0fdd93e92c903",
+                address: "0x037A3089219e5D4c46d780A28699e55055C4B776",
+                aaAddres: "0xFaC346cD3105E052cEc7595F6203c41c9bfA9118",
+                contractId: "4375dfbbdaff556d6f99a5cf",
+                projectId: "679ce380c4595d54f7c82a87d3274f8b",
+                email: "angelo.panichella@gmail.com"
+            }, email: "angelo.panichella@gmail.com",
+            name: "angelo",
+            language: "EN"
+        };
+
+        let expectedResponse = {
+            status: 200,
+        }
+
+        dynamoDBService.getCustomers.mockResolvedValue(mockGetCustomers);
+
+        const getBalance = {
+            body: {
+                "tuple-0": "50"
+            },
+            status: 200,
+        };
+
+        // Mock the Axios POST request
+        mockAxios.onPost().reply(400, getBalance);
+
+        let response = await getUserBalance(mockReq, mockRes);
+
+        expect(expectedResponse.status).toEqual(response.status)
 
     });
 

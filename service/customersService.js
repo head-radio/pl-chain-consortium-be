@@ -8,6 +8,8 @@ const crypto = require('crypto');
 const utilityService = require('./utilityService')
 const dynamoDBService = require('./dynamoDBService')
 
+const PlChainService = require('./PlChainService')
+
 let min = 300000
 let max = 999999
 
@@ -149,13 +151,34 @@ const validateEmailAndRegisterUser = async (request) => {
 
             await promise.then(
                 async result => {
-                    await dynamoDBService.insertCustomers(result)
-                    responseReturn = {
-                        status: 200,
-                        body: {
-                            success: true,
-                            message: 'Email verified! Please login now.'
+
+                    let plChainService = new PlChainService()
+                    let createAccountAbstractionResponse = await plChainService.createAccountAbstraction()
+                    console.log('createAccountAbstractionResponse', createAccountAbstractionResponse)
+
+                    if (createAccountAbstractionResponse.status == 200) {
+
+                        result.accountAbstraction = createAccountAbstractionResponse.body
+
+                        await dynamoDBService.insertCustomers(result)
+                        responseReturn = {
+                            status: 200,
+                            body: {
+                                success: true,
+                                message: 'Email verified! Please login now.'
+                            }
                         }
+
+                    } else {
+
+                        responseReturn = {
+                            status: 400,
+                            body: {
+                                success: false,
+                                message: 'Error during account abstraction creation.'
+                            }
+                        }
+
                     }
                 },
                 error => {
@@ -345,7 +368,10 @@ const login = async (request) => {
                 token,
                 name: user.name,
                 email: user.email,
-                language: user.language
+                language: user.language,
+                accountAbstraction: {
+                    aaAddres: user.accountAbstraction.aaAddres
+                }
             })
             let response = {
                 status: 200,
@@ -369,17 +395,9 @@ const getUser = async (req) => {
 
     let user = await dynamoDBService.getCustomers({ email: req.email })
 
-    let userObj = new Object({
-        name: user.name,
-        email: user.email,
-        language: user.language,
-        enableFingerprint: user.enableFingerprint,
-        enablePush: user.enablePush,
-    })
-
     let response = {
         status: 200,
-        body: userObj
+        body: user
     }
 
     return response
@@ -453,6 +471,23 @@ const deleteCustomers = async (request) => {
 
 }
 
+const getUserBalance = async (req) => {
+
+    let user = await dynamoDBService.getCustomers({ email: req.email })
+
+    let plChainService = new PlChainService()
+    let getUserBalanceResponse = await plChainService.getUserBalance(user.accountAbstraction.aaAddres)
+
+    let response = {
+        status: 200,
+        body: getUserBalanceResponse.body
+    }
+
+    return response
+
+}
+
+
 module.exports = {
     verifyEmailAddressAndSendEmail,
     validateEmailAndRegisterUser,
@@ -461,5 +496,6 @@ module.exports = {
     login,
     getUser,
     updateUser,
-    deleteCustomers
+    deleteCustomers,
+    getUserBalance
 };
