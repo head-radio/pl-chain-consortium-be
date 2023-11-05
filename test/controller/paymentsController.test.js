@@ -1,10 +1,12 @@
 const errorCode = require('../../enum/errorEnum')
 const paymentsService = require('../../service/paymentsService');
 const {
-    checkoutSession
+    paymentsRechargeCheckoutSession,
+    paymentsRechargeCallback
 } = require('../../controller/paymentsController');
 
-paymentsService.createCheckoutSession = jest.fn()
+paymentsService.createStripeCheckoutSession = jest.fn()
+paymentsService.paymentsRechargeCallback = jest.fn()
 
 describe('paymentsController', () => {
 
@@ -12,10 +14,12 @@ describe('paymentsController', () => {
 
         const mockReq = {
             body: {
-                email: 'test@example.com',
                 amount: 10,
                 currency: 'EUR'
             },
+            user: {
+                email: 'randomemail'
+            }
         };
 
         const mockRes = {
@@ -35,13 +39,62 @@ describe('paymentsController', () => {
             },
         };
 
-        paymentsService.createCheckoutSession.mockResolvedValue(mockResponse);
+        paymentsService.createStripeCheckoutSession.mockResolvedValue(mockResponse);
 
-        await checkoutSession(mockReq, mockRes);
+        await paymentsRechargeCheckoutSession(mockReq, mockRes);
 
-        expect(paymentsService.createCheckoutSession).toHaveBeenCalledWith(mockReq.body);
+        expect(paymentsService.createStripeCheckoutSession).toHaveBeenCalledWith({
+            email: 'randomemail',
+            amount: 10,
+            currency: 'EUR'
+        });
         expect(mockRes.status).toHaveBeenCalledWith(mockResponse.status);
         expect(mockRes.json).toHaveBeenCalledWith(mockResponse.body);
     });
+
+    it('should receive callback from stripe', async () => {
+
+        const mockReq = {
+            body: {
+                id: "evt_3O90djDoI0Ba3DbI3NmN9CLw",
+                data: {
+                    object: {
+                        id: "ch_3O90djDoI0Ba3DbI3nFsDbFU",
+                        object: "charge",
+                        amount: 3000,
+                        metadata: {
+                            walletId: "969171fc9073e407cf72957cc49e3892",
+                            aaAddress: "0xe3F34B3883636D9a23dd694B15a14c97602A73b6",
+                            email: "angelo.panichella@gmail.com"
+                        },
+                    }
+                },
+                type: "charge.succeeded"
+            }
+        };
+
+        const mockRes = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+            send: jest.fn(),
+        };
+
+        const mockResponse = {
+            status: 200,
+            body:
+            {
+                isTransferSuccess: true,
+                info: "charge.succeeded"
+            },
+        };
+
+        paymentsService.paymentsRechargeCallback.mockResolvedValue(mockResponse);
+
+        await paymentsRechargeCallback(mockReq, mockRes);
+        expect(mockRes.json).toHaveBeenCalledWith(mockResponse.body);
+        expect(mockRes.status).toHaveBeenCalledWith(mockResponse.status);
+
+    })
+
 
 });

@@ -1,11 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const {
-    checkoutSession
+    paymentsRechargeCheckoutSession,
+    paymentsRechargeCallback
 } = require('../controller/paymentsController');
 
 const { isAuth } = require('../config/auth');
 
-router.post('/payments/recharge', isAuth, checkoutSession);
+router.post('/payments/recharge', isAuth, paymentsRechargeCheckoutSession);
+router.post('/payments/recharge/callback', paymentsRechargeCallback);
 
 module.exports = router;

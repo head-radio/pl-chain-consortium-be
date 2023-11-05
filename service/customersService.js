@@ -4,11 +4,13 @@ const auth = require('../config/auth');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
+const Stripe = require('stripe')
 
 const utilityService = require('./utilityService')
 const dynamoDBService = require('./dynamoDBService')
 
-const PlChainService = require('./PlChainService')
+const PlChainService = require('./PlChainService');
+const Constants = require('../utility/Constants');
 
 let min = 300000
 let max = 999999
@@ -152,6 +154,16 @@ const validateEmailAndRegisterUser = async (request) => {
             await promise.then(
                 async result => {
 
+                    // stripe creation customer
+                    const stripeSecretKey = await utilityService.getProperty(Constants.STRIPE_SECRET_KEY)
+                    const stripe = Stripe(stripeSecretKey);
+                    let customer = await stripe.customers.create({
+                        email: result.email,
+                        description: result.email,
+                    })
+                    result.stripeCustomerId = customer.id
+
+                    // create account abstraction
                     let plChainService = new PlChainService()
                     let createAccountAbstractionResponse = await plChainService.createAccountAbstraction()
                     console.log('createAccountAbstractionResponse', createAccountAbstractionResponse)
@@ -370,7 +382,7 @@ const login = async (request) => {
                 email: user.email,
                 language: user.language,
                 accountAbstraction: {
-                    aaAddres: user.accountAbstraction.aaAddres
+                    aaAddress: user.accountAbstraction.aaAddress
                 }
             })
             let response = {
@@ -476,7 +488,7 @@ const getUserBalance = async (req) => {
     let user = await dynamoDBService.getCustomers({ email: req.email })
 
     let plChainService = new PlChainService()
-    let getUserBalanceResponse = await plChainService.getUserBalance(user.accountAbstraction.aaAddres)
+    let getUserBalanceResponse = await plChainService.getUserBalance(user.accountAbstraction.aaAddress)
 
     let response = {
         status: 200,

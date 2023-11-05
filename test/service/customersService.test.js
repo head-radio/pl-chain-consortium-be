@@ -20,10 +20,11 @@ dynamoDBService.insertCustomers = jest.fn()
 dynamoDBService.deleteCustomers = jest.fn()
 auth.sendEmail = jest.fn()
 
-const plChainService = require('../../service/PlChainService')
 const MockAdapter = require('axios-mock-adapter');
 const axios = require('axios');
 const mockAxios = new MockAdapter(axios);
+
+const { Stripe } = require('stripe');
 
 describe('customersService', () => {
 
@@ -189,6 +190,14 @@ describe('customersService', () => {
 
         // Mock the Axios POST request
         mockAxios.onPost().reply(200, createAccountAbstractionResponse);
+
+        //
+        const createCustomerMock = jest.fn(() => ({
+            id: "customer_id",
+        }));
+        Stripe.prototype.customers = {
+            create: createCustomerMock,
+        };
 
         let response = await validateEmailAndRegisterUser(mockReq, mockRes);
 
@@ -631,8 +640,8 @@ describe('customersService', () => {
         const mockGetCustomers = {
             email: 'test@example.com',
             password: bcrypt.hashSync(mockReq.password),
-            accountAbstraction : {
-                aaAddres:"0Xer64e6wr54tete6w"
+            accountAbstraction: {
+                aaAddres: "0Xer64e6wr54tete6w"
             }
         };
 
