@@ -24,6 +24,66 @@ const paymentsRechargeCheckoutSession = async (req, res) => {
 
 }
 
+const paymentTransferToken = async (req, res) => {
+
+    // #swagger.tags = ['Payments']
+    // #swagger.description = 'API to execute a token transfer.'
+
+    let to = req.body.to
+    let amount = req.body.amount
+    let sessionId = req.body.sessionId
+    let ipfsURI = req.body.ipfsURI
+    let nonce = req.body.nonce
+
+    try {
+        let response = await paymentsService.paymentTransferToken({
+            email: req.user.email,
+            to: to,
+            amount: amount,
+            sessionId: sessionId,
+            ipfsURI: ipfsURI,
+            nonce: nonce
+        })
+        res.status(response.status).json(response.body)
+    } catch (exception) {
+        res.status(exception.status).send({
+            error_code: exception.error_code,
+            message: exception.message,
+        });
+    }
+
+}
+
+const getPaymentTransferToken = async (req, res) => {
+
+    // #swagger.tags = ['Payments']
+    // #swagger.description = 'API to retrive the details of a session token transfer.'
+
+    let sessionId = req.params.sessionId
+
+    let response = await paymentsService.getPaymentTransferToken({
+        sessionId: sessionId,
+    })
+    res.status(response.status).json(response.body)
+
+}
+
+const getUserOperationOfPaymentTransferToken = async (req, res) => {
+
+    // #swagger.tags = ['Payments']
+    // #swagger.description = 'API to retrive the details of a userOperation related the payment done with account abstraction.'
+
+    let sessionId = req.params.sessionId
+    let userOperationHash = req.params.userOperationHash
+
+    let response = await paymentsService.getUserOperationOfPaymentTransferToken({
+        sessionId: sessionId,
+        userOperationHash: userOperationHash,
+    })
+    res.status(response.status).json(response.body)
+
+}
+
 const paymentsRechargeCallback = async (req, res) => {
 
     // #swagger.tags = ['Payments']
@@ -43,5 +103,8 @@ const paymentsRechargeCallback = async (req, res) => {
 
 module.exports = {
     paymentsRechargeCheckoutSession,
+    paymentTransferToken,
+    getPaymentTransferToken,
+    getUserOperationOfPaymentTransferToken,
     paymentsRechargeCallback
 };

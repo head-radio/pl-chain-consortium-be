@@ -56,10 +56,87 @@ const createStripeCheckoutSession = async (request) => {
     }
 }
 
+const paymentTransferToken = async (input) => {
+
+    try {
+        let response = {}
+        let customer = await customersService.getUser(input)
+
+        let plChainService = new PlChainService()
+        let generatePaymentTransferTokenSessionResponse = await plChainService.generatePaymentTransferTokenSession({
+            to: input.to,
+            amount: input.amount,
+            sessionId: input.sessionId,
+            ipfsURI: input.ipfsURI,
+            nonce: input.nonce
+        })
+        console.log('generatePaymentTransferTokenSessionResponse', generatePaymentTransferTokenSessionResponse)
+
+        if (generatePaymentTransferTokenSessionResponse.status != 200) {
+            response = {
+                status: generatePaymentTransferTokenSessionResponse.status,
+                body: generatePaymentTransferTokenSessionResponse.body
+            }
+            return response
+        }
+
+        let executeUserOperationResponse = await plChainService.executeUserOperation({
+            walletId: customer.body.accountAbstraction.walletId,
+            sessionId: generatePaymentTransferTokenSessionResponse.body.sessionId
+        })
+
+        response = {
+            status: executeUserOperationResponse.status,
+            body: executeUserOperationResponse.body
+        }
+
+        return response
+
+    } catch (exception) {
+
+        console.error(exception)
+        exception.status = exception.status || 400
+        exception.error_code = errorCode.errorEnum.invalid_data;
+
+        throw exception;
+
+    }
+
+}
+
+const getPaymentTransferToken = async (input) => {
+
+    let plChainService = new PlChainService()
+    let getPaymentTransferTokenResponse = await plChainService.getPaymentTransferToken({
+        sessionId: input.sessionId,
+    })
+    console.log('getPaymentTransferTokenResponse', getPaymentTransferTokenResponse)
+
+    let response = {
+        status: getPaymentTransferTokenResponse.status,
+        body: getPaymentTransferTokenResponse.body
+    }
+
+    return response
+
+}
+
+const getUserOperationOfPaymentTransferToken = async (input) => {
+
+    let plChainService = new PlChainService()
+    let getUserOperationOfPaymentTransferTokenResponse = await plChainService.getUserOperationOfPaymentTransferToken(input)
+    console.log('getUserOperationOfPaymentTransferToken', getUserOperationOfPaymentTransferTokenResponse)
+
+    let response = {
+        status: getUserOperationOfPaymentTransferTokenResponse.status,
+        body: getUserOperationOfPaymentTransferTokenResponse.body
+    }
+
+    return response
+
+}
+
 const paymentsRechargeCallback = async (input) => {
-
-    // create account abstraction
-
 
     let isTransferSuccess = false
     let status = 400
@@ -91,5 +168,8 @@ const paymentsRechargeCallback = async (input) => {
 
 module.exports = {
     createStripeCheckoutSession,
+    paymentTransferToken,
+    getPaymentTransferToken,
+    getUserOperationOfPaymentTransferToken,
     paymentsRechargeCallback
 };

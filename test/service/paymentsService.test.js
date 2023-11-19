@@ -1,7 +1,10 @@
 // stripe.tests.js
 const { Stripe } = require('stripe');
 const { createStripeCheckoutSession,
-    paymentsRechargeCallback
+    paymentsRechargeCallback,
+    paymentTransferToken,
+    getPaymentTransferToken,
+    getUserOperationOfPaymentTransferToken
 } = require("./../../service/paymentsService");
 
 const customersService = require('./../../service/customersService')
@@ -12,6 +15,15 @@ const axios = require('axios');
 const mockAxios = new MockAdapter(axios);
 
 describe("createCheckoutSession", () => {
+
+    beforeEach(() => {
+        console.log('beforeEach')
+    });
+    afterEach(() => {
+        console.log('afterEach')
+        jest.clearAllMocks();
+    });
+
     it("should create a checkout session", async () => {
 
         const request = {
@@ -112,6 +124,77 @@ describe("createCheckoutSession", () => {
 
         expect(response.status).toBe(400);
         expect(response.body.isTransferSuccess).toBe(false);
+    });
+
+
+    it("should execute paymentTransferToken", async () => {
+
+        const request = {
+            email: 'fsdkfjsalkf@gmail.com',
+            to: "0xgrkgòlakfaòlfk",
+            amount: "15",
+            sessionId: "gflkgjdslfkg",
+            ipfsURI: "fgkaklgjdfkl",
+            nonce: "fkgjdlksgjdsl"
+        };
+
+        customersService.getUser.mockResolvedValue({
+            status: 200,
+            body: {
+                stripeCustomerId: "customer_id",
+                accountAbstraction: {
+                    aaAddress: '0Xfdgdgfds',
+                    walletId: 'lkjflsakdjfaslkf'
+                }
+            }
+        });
+
+        mockAxios.onPost().reply(200, {});
+
+        const response = await paymentTransferToken(request);
+        expect(response.status).toBe(200);
+
+    });
+
+    it("should execute getPaymentTransferToken", async () => {
+
+        const request = {
+            sessionId: "gflkgjdslfkg",
+        };
+
+        mockAxios.onGet().reply(200, {});
+
+        const response = await getPaymentTransferToken(request);
+        expect(response.status).toBe(200);
+
+    });
+
+    it("should execute getUserOperationOfPaymentTransferToken", async () => {
+
+        const request = {
+            sessionId: "gflkgjdslfkg",
+            userOperationHash: '0xgdklgjdlkgjdls'
+        };
+
+        mockAxios.onGet().reply(200, {});
+
+        const response = await getUserOperationOfPaymentTransferToken(request);
+        expect(response.status).toBe(200);
+
+    });
+
+    it("should execute getUserOperationOfPaymentTransferToken - exception", async () => {
+
+        const request = {
+            sessionId: "gflkgjdslfkg",
+            userOperationHash: '0xgdklgjdlkgjdls'
+        };
+
+        mockAxios.onGet().reply(400, {});
+
+        const response = await getUserOperationOfPaymentTransferToken(request);
+        expect(response.status).toBe(400);
+
     });
 
 });
