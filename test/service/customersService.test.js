@@ -8,7 +8,8 @@ const {
     getUser,
     updateUser,
     deleteCustomers,
-    getUserBalance
+    getUserBalance,
+    validatePinCode
 } = require('../../service/customersService');
 const dynamoDBService = require('../../service/dynamoDBService');
 const bcrypt = require('bcryptjs');
@@ -861,6 +862,39 @@ describe('customersService', () => {
 
         let response = await getUserBalance(mockReq, mockRes);
 
+        expect(expectedResponse.status).toEqual(response.status)
+
+    });
+
+    //npm test -- customersService -t pinCodeValidation
+    it('should validate user pinCodeValidation', async () => {
+
+        const mockReq = {
+            email: 'test@example.com',
+            pinCodeValidation: '[1,2,3,4]',
+        };
+
+        const mockRes = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+            send: jest.fn(),
+        };
+
+        const mockGetCustomers = {
+            email: 'test@example.com',
+            pinCodeValidationHash: '7bd4c63ba2cdadb060f5730e7bf66a30',
+        };
+
+        let expectedResponse = {
+            status: 200,
+            body: mockReq
+        }
+
+        dynamoDBService.getCustomers.mockResolvedValue(mockGetCustomers);
+
+        let response = await validatePinCode(mockReq, mockRes);
+
+        expect(dynamoDBService.getCustomers).toHaveBeenCalledWith({ email: mockReq.email });
         expect(expectedResponse.status).toEqual(response.status)
 
     });

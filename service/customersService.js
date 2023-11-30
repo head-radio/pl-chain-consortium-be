@@ -322,7 +322,7 @@ const resetPasswordConfirm = async (request) => {
 
                     }
 
-                    dynamoDBUser.password = bcrypt.hashSync(request.password)
+                    dynamoDBUser.password = bcrypt.hashSync(decoded.password)
                     dynamoDBUser.passwordTokenVerification = undefined
 
                     resolve(dynamoDBUser)
@@ -331,8 +331,8 @@ const resetPasswordConfirm = async (request) => {
 
             })
 
-            let responseReturn;
-            let errorReturn;
+            let responseReturn
+            let errorReturn
 
             await promise.then(
                 async result => {
@@ -345,7 +345,9 @@ const resetPasswordConfirm = async (request) => {
                         }
                     }
                 },
-                error => {
+                async error => {
+                    dynamoDBUser.passwordTokenVerification = undefined
+                    await dynamoDBService.insertCustomers(dynamoDBUser)
                     errorReturn = error
                 }
             );
@@ -353,7 +355,6 @@ const resetPasswordConfirm = async (request) => {
             if (errorReturn) {
                 console.error(errorReturn)
                 throw errorReturn;
-
             }
 
             return responseReturn;
@@ -383,7 +384,8 @@ const login = async (request) => {
                 language: user.language,
                 accountAbstraction: {
                     aaAddress: user.accountAbstraction.aaAddress
-                }
+                },
+                pinCodeValidationHash: user.pinCodeValidationHash
             })
             let response = {
                 status: 200,
@@ -439,6 +441,11 @@ const updateUser = async (request) => {
         user.enableFingerprint = request.enableFingerprint
     }
 
+    if (request.pinCodeValidation != null) {
+        const pinCodeValidationHash = crypto.createHash('md5').update(request.pinCodeValidation.toString()).digest("hex")
+        user.pinCodeValidationHash = pinCodeValidationHash
+    }
+
     await dynamoDBService.insertCustomers(user)
 
     let userObj = new Object({
@@ -446,7 +453,8 @@ const updateUser = async (request) => {
         email: user.email,
         language: user.language,
         enablePush: user.enablePush,
-        enableFingerprint: user.enableFingerprint
+        enableFingerprint: user.enableFingerprint,
+        pinCodeValidation: user.pinCodeValidation
     })
 
     let response = {
@@ -499,6 +507,36 @@ const getUserBalance = async (req) => {
 
 }
 
+const validatePinCode = async (req) => {
+
+    let user = await dynamoDBService.getCustomers({ email: req.email })
+
+    if (await utilityService.isObjEmpty(user)) {
+        let error = new Error('Invalid user!')
+        error.status = 400
+        error.error_code = errorCode.errorEnum.invalid_data;
+        throw error;
+    }
+
+    const pinCodeValidationHash = crypto.createHash('md5').update(req.pinCodeValidation.toString()).digest("hex")
+    console.log('> validatePinCode - pinCodeValidationHash', pinCodeValidationHash)
+
+    if (pinCodeValidationHash != user.pinCodeValidationHash) {
+        let error = new Error('Invalid Pin Code Validation!')
+        error.status = 400
+        error.error_code = errorCode.errorEnum.invalid_data;
+        throw error;
+    }
+
+    let response = {
+        status: 200,
+        body: user
+    }
+
+    return response
+
+}
+
 
 module.exports = {
     verifyEmailAddressAndSendEmail,
@@ -509,5 +547,6 @@ module.exports = {
     getUser,
     updateUser,
     deleteCustomers,
-    getUserBalance
+    getUserBalance,
+    validatePinCode
 };

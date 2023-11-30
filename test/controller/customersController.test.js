@@ -9,7 +9,8 @@ const {
     resetPassword,
     resetPasswordConfirm,
     login,
-    getUserBalance
+    getUserBalance,
+    validatePinCode
 } = require('../../controller/customersController');
 
 customersService.verifyEmailAddressAndSendEmail = jest.fn()
@@ -21,6 +22,7 @@ customersService.deleteCustomers = jest.fn()
 customersService.getUser = jest.fn()
 customersService.login = jest.fn()
 customersService.getUserBalance = jest.fn()
+customersService.validatePinCode = jest.fn()
 
 describe('customersController', () => {
 
@@ -139,7 +141,6 @@ describe('customersController', () => {
         const mockReq = {
             body: {
                 email: 'test@gmail.com',
-                password: 'newpassword',
                 codeVerification: 123456
             },
         };
@@ -239,7 +240,7 @@ describe('customersController', () => {
             status: 200,
             body: {
                 "tuple-0": "50"
-              },
+            },
         };
 
         customersService.getUserBalance.mockResolvedValue(mockResponse);
@@ -345,5 +346,39 @@ describe('customersController', () => {
         expect(mockRes.status).toHaveBeenCalledWith(mockResponse.status);
     });
 
+    it('should validate user PIN Code', async () => {
+
+        let email_test = 'test@gmail.com'
+        const mockReq = {
+            user: {
+                email: email_test
+            },
+            body: {
+                email: email_test,
+                pinCodeValidation: "[1,2,3,4]",
+            },
+        };
+
+        const mockRes = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+            send: jest.fn(),
+        };
+
+        const mockResponse = {
+            status: 200,
+            body: {
+                name: 'Test User Name',
+                pinCodeValidation: "hashPinCodeValidation"
+            }
+        };
+
+        customersService.validatePinCode.mockResolvedValue(mockResponse);
+
+        await validatePinCode(mockReq, mockRes);
+
+        expect(customersService.validatePinCode).toHaveBeenCalledWith(mockReq.body);
+        expect(mockRes.status).toHaveBeenCalledWith(mockResponse.status);
+    });
 
 });

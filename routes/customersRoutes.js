@@ -9,7 +9,8 @@ const {
     getUser,
     updateUser,
     deleteCustomers,
-    getUserBalance
+    getUserBalance,
+    validatePinCode
 } = require('../controller/customersController');
 
 const {
@@ -20,6 +21,7 @@ const { isAuth } = require('../config/auth');
 
 router.post('/customers', emailVerificationLimit, verifyEmailAddress);
 router.post('/customers/validate-email', validateEmailAndRegisterUser);
+router.post('/customers/validate-pin-code', isAuth, validatePinCode);
 router.post('/customers/reset-password', resetPassword);
 router.put('/customers/reset-password', resetPasswordConfirm);
 router.post('/customers/login', login);

@@ -53,8 +53,8 @@ const handler = serverless(app)
 
 module.exports.handler = async (event, context) => {
   context.callbackWaitsForEmptyEventLoop = false
-  console.log('Before handler with set context')
+  //console.log('Before handler with set context')
   const result = await handler(event, context)
-  console.log('After handler')
+  //console.log('After handler')
   return result
 }

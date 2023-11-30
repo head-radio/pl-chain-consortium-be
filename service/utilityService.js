@@ -33,17 +33,19 @@ const getProperty = async (input) => {
 
   let value
 
+  /*
   console.log('> start getProperty for input: ' + input
     + ' > process.env.NODE_ENV: ' + process.env.NODE_ENV
     + ' > process.env.SECRETS_NAME: ' + process.env.SECRETS_NAME
     + ' > process.env.REGION: ' + process.env.REGION)
-
+  */
+ 
   if (process.env.NODE_ENV == 'local' || process.env.NODE_ENV == 'test') {
     value = process.env[input]
   } else {
     let secrets = await secretsManager.getSecret(process.env.SECRETS_NAME, process.env.REGION);
     let jsonSecrets = JSON.parse(secrets)
-    console.log('> secrets: ' + jsonSecrets)
+    //console.log('> secrets: ' + jsonSecrets)
     value = jsonSecrets[input]
   }
 
