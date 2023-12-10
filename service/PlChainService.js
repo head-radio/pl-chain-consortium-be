@@ -219,13 +219,9 @@ class PlChainService {
                     contractId: plChainConsortiumContractId,
                     total: 0,
                     payload: {
-                        function: "transferToken",
+                        function: "transferTokenWithStruct",
                         inputsValue: [
-                            input.to,
-                            input.amount,
-                            input.sessionId,
-                            input.ipfsURI,
-                            input.nonce
+                            JSON.stringify(input)
                         ]
                     }
                 },
@@ -412,6 +408,72 @@ class PlChainService {
                     headers: {
                         'Authorization': 'API-KEY: ' + plChainApiKey,
                         'accept': 'application/json',
+                    }
+                }
+            )
+                .then((response) => {
+                    const responseG = {
+                        body: response.data,
+                        status: response.status
+                    };
+                    resolve(responseG);
+                })
+                .catch((error) => {
+                    console.error(error)
+                    const responseG = {
+                        status: error.response.status,
+                        message: error.response.statusText,
+                        body: error.response.data
+                    };
+                    reject(responseG);
+                });
+        });
+
+
+        await promise.then(
+            (response) => {
+                console.log(response);
+                responseG = response
+            },
+            (error) => {
+                console.error(error);
+                responseG = error
+            });
+
+        return responseG
+
+    }
+
+    async getPaymentTransactions(input) {
+
+        console.log("> start getPaymentTransactions with input", JSON.stringify(input))
+        let responseG = new Object()
+
+        let plChainBasePath = process.env.PL_CHAIN_BASE_PATH
+        let plChainApiKey = await utilityService.getProperty(Constants.PL_CHAIN_API_KEY)
+        let plChainConsortiumContractAddress = process.env.PL_CHAIN_CONSORTIUM_CONTRACT_ADDRESS
+        let plChainProjectId = process.env.PL_CHAIN_PROJECT_ID
+        let plChainConsortiumContractId = process.env.PL_CHAIN_CONSORTIUM_CONTRACT_ID
+
+        let promise = new Promise((resolve, reject) => {
+            axios.post(
+                plChainBasePath + '/contracts/execution/read-transaction',
+                {
+                    contractAddress: plChainConsortiumContractAddress,
+                    projectId: plChainProjectId,
+                    contractId: plChainConsortiumContractId,
+                    payload: {
+                        function: "getTransactionsByAddress",
+                        inputsValue: [
+                            input.address
+                        ]
+                    }
+                },
+                {
+                    headers: {
+                        'Authorization': 'API-KEY: ' + plChainApiKey,
+                        'accept': 'application/json',
+                        'Content-Type': 'application/json',
                     }
                 }
             )

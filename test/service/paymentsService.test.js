@@ -4,7 +4,8 @@ const { createStripeCheckoutSession,
     paymentsRechargeCallback,
     paymentTransferToken,
     getPaymentTransferToken,
-    getUserOperationOfPaymentTransferToken
+    getUserOperationOfPaymentTransferToken,
+    getPaymentTransactions
 } = require("./../../service/paymentsService");
 
 const customersService = require('./../../service/customersService')
@@ -194,6 +195,19 @@ describe("createCheckoutSession", () => {
 
         const response = await getUserOperationOfPaymentTransferToken(request);
         expect(response.status).toBe(400);
+
+    });
+
+    it("should execute getPaymentTransactions", async () => {
+
+        const request = {
+            address: "0xf456s4fs56af4a65sdf4a6s5df",
+        };
+
+        mockAxios.onGet().reply(200, {});
+
+        const response = await getPaymentTransactions(request);
+        expect(response.status).toBe(200);
 
     });
 

@@ -5,7 +5,8 @@ const {
     paymentTransferToken,
     getPaymentTransferToken,
     getUserOperationOfPaymentTransferToken,
-    paymentsRechargeCallback
+    paymentsRechargeCallback,
+    getPaymentTransactions
 } = require('../../controller/paymentsController');
 
 paymentsService.createStripeCheckoutSession = jest.fn()
@@ -13,6 +14,7 @@ paymentsService.paymentTransferToken = jest.fn()
 paymentsService.getPaymentTransferToken = jest.fn()
 paymentsService.getUserOperationOfPaymentTransferToken = jest.fn()
 paymentsService.paymentsRechargeCallback = jest.fn()
+paymentsService.getPaymentTransactions = jest.fn()
 
 describe('paymentsController', () => {
 
@@ -199,4 +201,31 @@ describe('paymentsController', () => {
 
     })
 
+    it('should retrieve transactions by address', async () => {
+
+        const mockReq = {
+            params: {
+                address: "0xgd5fg4d654g65gretew6",
+            }
+        };
+
+        const mockRes = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+            send: jest.fn(),
+        };
+
+        const mockServiceResponse = {
+            status: 200,
+            body: {
+            },
+        };
+
+        paymentsService.getPaymentTransactions.mockResolvedValue(mockServiceResponse);
+
+        await getPaymentTransactions(mockReq, mockRes);
+
+        expect(mockRes.status).toHaveBeenCalledWith(mockServiceResponse.status);
+
+    })
 });

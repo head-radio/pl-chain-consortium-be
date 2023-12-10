@@ -29,20 +29,18 @@ const paymentTransferToken = async (req, res) => {
     // #swagger.tags = ['Payments']
     // #swagger.description = 'API to execute a token transfer.'
 
+    let from = req.body.from
     let to = req.body.to
     let amount = req.body.amount
     let sessionId = req.body.sessionId
     let ipfsURI = req.body.ipfsURI
     let nonce = req.body.nonce
+    let name = req.body.name
 
     try {
         let response = await paymentsService.paymentTransferToken({
-            email: req.user.email,
-            to: to,
-            amount: amount,
-            sessionId: sessionId,
-            ipfsURI: ipfsURI,
-            nonce: nonce
+            ...{ email: req.user.email },
+            ...req.body
         })
         res.status(response.status).json(response.body)
     } catch (exception) {
@@ -101,10 +99,25 @@ const paymentsRechargeCallback = async (req, res) => {
 
 }
 
+const getPaymentTransactions = async (req, res) => {
+
+    // #swagger.tags = ['Payments']
+    // #swagger.description = 'API to retrive the list of transaction given an address.'
+
+    let address = req.params.address
+
+    let response = await paymentsService.getPaymentTransactions({
+        address: address,
+    })
+    res.status(response.status).json(response.body)
+
+}
+
 module.exports = {
     paymentsRechargeCheckoutSession,
     paymentTransferToken,
     getPaymentTransferToken,
     getUserOperationOfPaymentTransferToken,
-    paymentsRechargeCallback
+    paymentsRechargeCallback,
+    getPaymentTransactions
 };

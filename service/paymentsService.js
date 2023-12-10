@@ -63,13 +63,7 @@ const paymentTransferToken = async (input) => {
         let customer = await customersService.getUser(input)
 
         let plChainService = new PlChainService()
-        let generatePaymentTransferTokenSessionResponse = await plChainService.generatePaymentTransferTokenSession({
-            to: input.to,
-            amount: input.amount,
-            sessionId: input.sessionId,
-            ipfsURI: input.ipfsURI,
-            nonce: input.nonce
-        })
+        let generatePaymentTransferTokenSessionResponse = await plChainService.generatePaymentTransferTokenSession(input)
         console.log('generatePaymentTransferTokenSessionResponse', generatePaymentTransferTokenSessionResponse)
 
         if (generatePaymentTransferTokenSessionResponse.status != 200) {
@@ -166,10 +160,28 @@ const paymentsRechargeCallback = async (input) => {
 
 }
 
+const getPaymentTransactions = async (input) => {
+
+    let plChainService = new PlChainService()
+    let getPaymentTransactionsResponse = await plChainService.getPaymentTransactions({
+        address: input.address,
+    })
+    console.log('getPaymentTransactions', getPaymentTransactionsResponse)
+
+    let response = {
+        status: getPaymentTransactionsResponse.status,
+        body: getPaymentTransactionsResponse.body
+    }
+
+    return response
+
+}
+
 module.exports = {
     createStripeCheckoutSession,
     paymentTransferToken,
     getPaymentTransferToken,
     getUserOperationOfPaymentTransferToken,
-    paymentsRechargeCallback
+    paymentsRechargeCallback,
+    getPaymentTransactions
 };
