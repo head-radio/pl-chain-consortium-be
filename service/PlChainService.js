@@ -152,7 +152,7 @@ class PlChainService {
                     encryptedWalletKey: plChainEncryptedWalletKey,
                     total: 0,
                     payload: {
-                        function: "transfer",
+                        function: "rechargeToken",
                         inputsValue: [
                             input.aaAddress,
                             input.amount
@@ -219,7 +219,7 @@ class PlChainService {
                     contractId: plChainConsortiumContractId,
                     total: 0,
                     payload: {
-                        function: "transferTokenWithStruct",
+                        function: "transferToken",
                         inputsValue: [
                             JSON.stringify(input)
                         ]
