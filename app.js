@@ -10,6 +10,7 @@ const swaggerFile = require('./swagger_output.json')
 
 const customersRoutes = require('./routes/customersRoutes');
 const paymentsRoutes = require('./routes/paymentsRoutes');
+const marketplaceRoutes = require('./routes/marketplaceRoutes');
 
 // best practice dependencies
 const compression = require('compression');
@@ -42,6 +43,7 @@ app.use(express.json({ limit: '50mb' }));
 app.use(lbBasePath + '/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerFile))
 app.use(lbBasePath, customersRoutes);
 app.use(lbBasePath, paymentsRoutes)
+app.use(lbBasePath, marketplaceRoutes)
 
 const httpServer = require("http").Server(app)
 

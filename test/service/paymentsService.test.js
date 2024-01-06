@@ -15,7 +15,7 @@ const MockAdapter = require('axios-mock-adapter');
 const axios = require('axios');
 const mockAxios = new MockAdapter(axios);
 
-describe("createCheckoutSession", () => {
+describe("paymentsService", () => {
 
     beforeEach(() => {
         console.log('beforeEach')
