@@ -118,7 +118,7 @@ const getPaymentTransferToken = async (input) => {
 const getUserOperationOfPaymentTransferToken = async (input) => {
 
     let plChainService = new PlChainService()
-    let getUserOperationOfPaymentTransferTokenResponse = await plChainService.getUserOperationOfPaymentTransferToken(input)
+    let getUserOperationOfPaymentTransferTokenResponse = await plChainService.getUserOperationReceipt(input)
     console.log('getUserOperationOfPaymentTransferToken', getUserOperationOfPaymentTransferTokenResponse)
 
     let response = {

@@ -1,10 +1,18 @@
 const errorCode = require('../../enum/errorEnum')
 const marketplacesService = require('../../service/marketplacesService');
 const {
-    getNFTs
+    getNFTs,
+    executeNFTCreation,
+    executeNFTTransfer,
+    getUserOperationOfNFTTransfer,
+    executeUploadImage
 } = require('../../controller/marketplacesController');
 
 marketplacesService.getNFTs = jest.fn()
+marketplacesService.executeNFTCreation = jest.fn()
+marketplacesService.executeNFTTransfer = jest.fn()
+marketplacesService.getUserOperationOfNFTTransfer = jest.fn()
+marketplacesService.executeUploadImage = jest.fn()
 
 describe('marketplacesController', () => {
 
@@ -45,4 +53,128 @@ describe('marketplacesController', () => {
         expect(mockRes.status).toHaveBeenCalledWith(mockServiceResponse.status);
 
     })
+
+    //npm test -- marketplacesController -t execute
+    it('should execute NFT creation', async () => {
+
+        let email_test = 'test@gmail.com'
+        const mockReq = {
+            user: {
+                email: email_test
+            },
+            body: {
+            },
+        };
+
+        const mockRes = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+            send: jest.fn(),
+        };
+
+        const mockServiceResponse = {
+            status: 200,
+            body: {
+            },
+        };
+
+        marketplacesService.executeNFTCreation.mockResolvedValue(mockServiceResponse);
+
+        await executeNFTCreation(mockReq, mockRes);
+
+        expect(mockRes.status).toHaveBeenCalledWith(mockServiceResponse.status);
+
+    })
+
+    it('should execute NFT transfer', async () => {
+
+        let email_test = 'test@gmail.com'
+        const mockReq = {
+            user: {
+                email: email_test
+            },
+            body: {
+            },
+        };
+
+        const mockRes = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+            send: jest.fn(),
+        };
+
+        const mockServiceResponse = {
+            status: 200,
+            body: {
+            },
+        };
+
+        marketplacesService.executeNFTTransfer.mockResolvedValue(mockServiceResponse);
+
+        await executeNFTTransfer(mockReq, mockRes);
+
+        expect(mockRes.status).toHaveBeenCalledWith(mockServiceResponse.status);
+
+    })
+
+    it('should get user operation of NFT transfer', async () => {
+
+        const mockReq = {
+            params: {
+                sessionId: "gflkgjdslfkg",
+                userOperationHash: '0xfsjglakgjldkgj'
+            }
+        };
+
+        const mockRes = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+            send: jest.fn(),
+        };
+
+        const mockServiceResponse = {
+            status: 200,
+            body: {
+            },
+        };
+
+        marketplacesService.getUserOperationOfNFTTransfer.mockResolvedValue(mockServiceResponse);
+
+        await getUserOperationOfNFTTransfer(mockReq, mockRes);
+
+        expect(mockRes.status).toHaveBeenCalledWith(mockServiceResponse.status);
+
+    })
+
+    it('should upload Image to IPFS', async () => {
+
+        let email_test = 'test@gmail.com'
+        const mockReq = {
+            user: {
+                email: email_test
+            },
+            files: [{
+            }],
+        };
+
+        const mockRes = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+            send: jest.fn(),
+        };
+
+        const mockServiceResponse = {
+            status: 200,
+            body: {
+            },
+        };
+
+        marketplacesService.executeUploadImage.mockResolvedValue(mockServiceResponse);
+
+        await executeUploadImage(mockReq, mockRes);
+
+        expect(mockRes.status).toHaveBeenCalledWith(mockServiceResponse.status);
+
+    })
+
 });

@@ -35,18 +35,30 @@ const doc = {
         },
     ],
     securityDefinitions: {
-
         Bearer: {
             type: "apiKey",
             name: "Authorization",
             in: "header"
         }
-
     },
     definitions: {
         Customer: {
             name: "Jhon Doe",
             email: "email@gmail.com",
+        },
+        CreateNFT: {
+            $ipfsURL: "ipfsURL",
+            $imageName: "imageName",
+            $contentType: "contentType",
+            $name: "name",
+            $description: "description",
+            $price: "5.3",
+            $attributes: [
+                {
+                    key: "attribute-key",
+                    value: "attribute-value"
+                }
+            ]
         },
     }
 }
