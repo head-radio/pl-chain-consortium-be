@@ -1,8 +1,5 @@
 const errorCode = require('../enum/errorEnum')
-const Stripe = require("stripe")
-const utilityService = require('./utilityService')
 const customersService = require('./customersService')
-const Constants = require('../utility/Constants')
 const PlChainService = require('./PlChainService')
 
 const getNFTs = async (input) => {
@@ -97,7 +94,10 @@ const executeNFTCreation = async (input) => {
 
         response = {
             status: executeUserOperationResponse.status,
-            body: executeUserOperationResponse.body
+            body: {
+                ...executeUserOperationResponse.body,
+                nftCreationSession: generateNFTCreationSessionResponse.body
+            }
         }
 
         console.log("> executeNFTCreation - executeUserOperationResponse:", JSON.stringify(response))

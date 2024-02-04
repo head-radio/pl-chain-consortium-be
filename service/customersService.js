@@ -411,7 +411,7 @@ const getUser = async (req) => {
 
     let response = {
         status: 200,
-        body: user
+        body: { ...user }
     }
 
     return response
@@ -444,6 +444,10 @@ const updateUser = async (request) => {
     if (request.pinCodeValidation != null) {
         const pinCodeValidationHash = crypto.createHash('md5').update(request.pinCodeValidation.toString()).digest("hex")
         user.pinCodeValidationHash = pinCodeValidationHash
+    }
+
+    if (request.stripeAccountId) {
+        user.stripeAccountId = request.stripeAccountId
     }
 
     await dynamoDBService.insertCustomers(user)
@@ -537,6 +541,218 @@ const validatePinCode = async (req) => {
 
 }
 
+const bankOnBoarding = async (req) => {
+
+    try {
+
+        console.log("> start bankOnBoarding - email", req.email)
+
+        let customerResponse = await getUser({ email: req.email })
+
+        if (await utilityService.isObjEmpty(customerResponse.body)) {
+            let error = new Error('Invalid user!')
+            error.status = 400
+            error.error_code = errorCode.errorEnum.invalid_data;
+            throw error;
+        }
+
+        const stripeSecretKey = await utilityService.getProperty(Constants.STRIPE_SECRET_KEY)
+        const stripe = Stripe(stripeSecretKey);
+
+        let accountLink = new Object()
+
+        if (customerResponse.body.stripeAccountId) {
+            let retriveAccount = await stripe.accounts.retrieve(customerResponse.body.stripeAccountId)
+            console.log("> customerService - bankOnBoarding - stripeAccountId for the user " + customerResponse.body.email
+                + " is already exists and it is " + customerResponse.body.stripeAccountId
+                + " and oboarding_status is " + retriveAccount.charges_enabled)
+            if (retriveAccount.charges_enabled) {
+                accountLink = await stripe.accounts.createLoginLink(customerResponse.body.stripeAccountId)
+            } else {
+                accountLink = await stripe.accountLinks.create({
+                    account: customerResponse.body.stripeAccountId,
+                    refresh_url: "https://www.pl-chain.com",
+                    return_url: "https://www.pl-chain.com",
+                    type: "account_onboarding",
+                });
+                console.log("> accountLink", accountLink)
+            }
+        } else {
+            console.log("> customerService - bankOnBoarding - stripeAccountId for the user " + customerResponse.body.email + " not exists - start to create it ...")
+            const account = await stripe.accounts.create({
+                email: customerResponse.body.email,
+                type: "express",
+                capabilities: {
+                    card_payments: { requested: true },
+                    transfers: { requested: true },
+                },
+            });
+            console.log("> customerService - bankOnBoarding - account", account)
+            customerResponse.body.stripeAccountId = account.id
+            updateUser(customerResponse.body)
+
+            accountLink = await stripe.accountLinks.create({
+                account: customerResponse.body.stripeAccountId,
+                refresh_url: "https://www.pl-chain.com",
+                return_url: "https://www.pl-chain.com",
+                type: "account_onboarding",
+            });
+            console.log("> accountLink", accountLink)
+        }
+
+        let response = {
+            status: 200,
+            body: {
+                accountLink: accountLink.url
+            }
+        }
+
+        return response
+
+    } catch (exception) {
+
+        console.error(exception)
+        exception.status = exception.status || 400
+        exception.error_code = errorCode.errorEnum.invalid_data;
+
+        throw exception;
+
+    }
+
+}
+
+const getBankOnBoarding = async (request) => {
+
+    try {
+
+        console.log("> start getBankOnBoarding", request)
+
+        let stripeDetails = new Object()
+
+        let customer = await dynamoDBService.getCustomers({ email: request.email })
+
+        if (customer?.stripeAccountId) {
+            const stripeSecretKey = await utilityService.getProperty(Constants.STRIPE_SECRET_KEY)
+            const stripe = Stripe(stripeSecretKey);
+            const account = await stripe.accounts.retrieve(customer?.stripeAccountId);
+            console.log("> getUser - stripe account", account)
+            stripeDetails.account = account
+        }
+
+        let response = {
+            status: 200,
+            body: { ...customer, stripeDetails }
+        }
+
+        return response
+
+    } catch (exception) {
+
+        console.error(exception)
+        exception.status = exception.status || 400
+        exception.error_code = errorCode.errorEnum.invalid_data;
+
+        throw exception;
+
+    }
+
+}
+
+const bankOnBoardingPayOff = async (input) => {
+
+    try {
+
+        console.log("> start bankOnBoardingPayOff", JSON.stringify(input))
+
+        let customer = await getUser(input)
+
+        // check existing user
+        if (await utilityService.isObjEmpty(customer.body)) {
+            let error = new Error('Invalid user!')
+            error.status = 400
+            error.error_code = errorCode.errorEnum.invalid_data;
+            throw error;
+        }
+
+        // check the user must be onboarded on stripe account
+        if (await utilityService.isObjEmpty(customer.body.stripeAccountId)) {
+            let error = new Error('User has no stripeAccountId!')
+            error.status = 400
+            error.error_code = errorCode.errorEnum.invalid_data;
+            throw error;
+        }
+
+        const stripeSecretKey = await utilityService.getProperty(Constants.STRIPE_SECRET_KEY)
+        const stripe = Stripe(stripeSecretKey);
+
+        let balanceResponse = await getUserBalance(input)
+        console.log("> balance", JSON.stringify(balanceResponse))
+
+        // balance must be available
+        if (balanceResponse.status != 200) {
+            let error = new Error('Fail to retrieve balance!')
+            error.status = 400
+            error.error_code = errorCode.errorEnum.unexpected_error;
+            throw error;
+        }
+
+        let balance = balanceResponse.body[0]["tuple-0"]
+        console.log("> rawBalance is ", balance)
+
+        // check data input
+        if (await utilityService.isObjEmpty(input.amount)) {
+            let error = new Error('Invalid amount!')
+            error.status = 400
+            error.error_code = errorCode.errorEnum.invalid_data;
+            throw error;
+        }
+
+        // check the balance must be greater than the input amount
+        if (parseFloat(input.amount) > parseFloat(balance)) {
+            let error = new Error('Insufficient amount!')
+            error.status = 400
+            error.error_code = errorCode.errorEnum.invalid_data;
+            throw error;
+        }
+
+        //////////////////
+        let plChainService = new PlChainService()
+        let payOffBurnTokenResponse = await plChainService.payOffBurnToken({
+            address: customer.body.accountAbstraction.aaAddress,
+            amount: input.amount
+        })
+        console.log('payOffBurnTokenResponse', payOffBurnTokenResponse)
+
+        let isBurnedSuccess = (payOffBurnTokenResponse.status == 200)
+
+        let transferStripe = new Object()
+        if (isBurnedSuccess) {
+            // call stripe to transfer cash
+            transferStripe = await stripe.transfers.create({
+                amount: input.amount,
+                currency: "eur",
+                destination: customer.body.stripeAccountId,
+            });
+        }
+
+        let response = {
+            status: payOffBurnTokenResponse.status,
+            body: { ...payOffBurnTokenResponse.body, transferStripe }
+        }
+
+        return response
+
+    } catch (exception) {
+
+        console.error(exception)
+        exception.status = exception.status || 400
+        exception.error_code = errorCode.errorEnum.invalid_data;
+
+        throw exception;
+
+    }
+
+}
 
 module.exports = {
     verifyEmailAddressAndSendEmail,
@@ -548,5 +764,8 @@ module.exports = {
     updateUser,
     deleteCustomers,
     getUserBalance,
-    validatePinCode
+    validatePinCode,
+    bankOnBoarding,
+    getBankOnBoarding,
+    bankOnBoardingPayOff
 };

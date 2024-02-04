@@ -24,7 +24,7 @@ const cors = require("cors")
 app.use(cors({
   origin: "*"
 }))
-console.log("set CORS with *")
+//console.log("set CORS with *")
 
 let lbBasePath = process.env.PL_CHAIN_BACKEND_CONTEXT_PATH
 
@@ -48,7 +48,7 @@ app.use(lbBasePath, marketplaceRoutes)
 const httpServer = require("http").Server(app)
 
 httpServer.listen(process.env.PORT || 3000, () => {
-  console.log('listening on port ' + (process.env.PORT || 3000));
+  //console.log('listening on port ' + (process.env.PORT || 3000));
 })
 
 const handler = serverless(app)

@@ -49,7 +49,7 @@ const getProperty = async (input) => {
     value = jsonSecrets[input]
   }
 
-  console.log('> end getProperty for input: ' + input + ' - result value: ' + value)
+  //console.log('> end getProperty for input: ' + input + ' - result value: ' + value)
 
   return value
 

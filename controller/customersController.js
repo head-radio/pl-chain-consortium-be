@@ -203,6 +203,65 @@ const validatePinCode = async (req, res) => {
 
 }
 
+const bankOnBoarding = async (req, res) => {
+
+    // #swagger.tags = ['Customers']
+    // #swagger.description = 'Customer bank on boarding.'
+
+    try {
+        console.log("bankOnBoarding with " + req.user.email)
+        let response = await customersService.bankOnBoarding({
+            email: req.user.email,
+        })
+        res.status(response.status).send(response.body)
+    } catch (exception) {
+        res.status(exception.status).send({
+            error_code: exception.error_code,
+            message: exception.message,
+        });
+    }
+
+}
+
+const getBankOnBoarding = async (req, res) => {
+
+    // #swagger.tags = ['Customers']
+    // #swagger.description = 'Get Customer bank on boarding.'
+
+    try {
+        console.log("getBankOnBoarding with " + req.user.email)
+        let response = await customersService.getBankOnBoarding({
+            email: req.user.email,
+        })
+        res.status(response.status).json(response.body)
+    } catch (exception) {
+        res.status(exception.status).send({
+            error_code: exception.error_code,
+            message: exception.message,
+        });
+    }
+
+}
+
+const bankOnBoardingPayOff = async (req, res) => {
+
+    // #swagger.tags = ['Customers']
+    // #swagger.description = 'Customer bank on boarding payoff.'
+
+    try {
+        let response = await customersService.bankOnBoardingPayOff({
+            email: req.user.email,
+            amount: req.body.amount
+        })
+        res.status(response.status).json(response.body)
+    } catch (exception) {
+        res.status(exception.status).send({
+            error_code: exception.error_code,
+            message: exception.message,
+        });
+    }
+
+}
 
 module.exports = {
     verifyEmailAddress,
@@ -214,5 +273,8 @@ module.exports = {
     updateUser,
     deleteCustomers,
     getUserBalance,
-    validatePinCode
+    validatePinCode,
+    bankOnBoarding,
+    getBankOnBoarding,
+    bankOnBoardingPayOff
 };

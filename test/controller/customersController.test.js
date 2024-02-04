@@ -10,7 +10,10 @@ const {
     resetPasswordConfirm,
     login,
     getUserBalance,
-    validatePinCode
+    validatePinCode,
+    bankOnBoarding,
+    getBankOnBoarding,
+    bankOnBoardingPayOff
 } = require('../../controller/customersController');
 
 customersService.verifyEmailAddressAndSendEmail = jest.fn()
@@ -23,6 +26,9 @@ customersService.getUser = jest.fn()
 customersService.login = jest.fn()
 customersService.getUserBalance = jest.fn()
 customersService.validatePinCode = jest.fn()
+customersService.bankOnBoarding = jest.fn()
+customersService.getBankOnBoarding = jest.fn()
+customersService.bankOnBoardingPayOff = jest.fn()
 
 describe('customersController', () => {
 
@@ -378,6 +384,102 @@ describe('customersController', () => {
         await validatePinCode(mockReq, mockRes);
 
         expect(customersService.validatePinCode).toHaveBeenCalledWith(mockReq.body);
+        expect(mockRes.status).toHaveBeenCalledWith(mockResponse.status);
+    });
+
+    it('should bankOnBoarding the user', async () => {
+
+        let email_test = 'test@gmail.com'
+        const mockReq = {
+            user: {
+                email: email_test
+            },
+            body: {
+                email: email_test,
+            },
+        };
+
+        const mockRes = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+            send: jest.fn(),
+        };
+
+        const mockResponse = {
+            status: 200,
+            body: {
+            }
+        };
+
+        customersService.bankOnBoarding.mockResolvedValue(mockResponse);
+
+        await bankOnBoarding(mockReq, mockRes);
+
+        expect(customersService.bankOnBoarding).toHaveBeenCalledWith(mockReq.body);
+        expect(mockRes.status).toHaveBeenCalledWith(mockResponse.status);
+    });
+
+    //npm test -- customersController -t getBankOnBoarding
+    it('should get user getBankOnBoarding infos', async () => {
+
+        let email_test = 'test@gmail.com'
+        const mockReq = {
+            user: {
+                email: email_test
+            },
+        };
+
+        const mockRes = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+            send: jest.fn(),
+        };
+
+        const mockResponse = {
+            status: 200,
+            body: {
+            }
+        };
+
+        customersService.getBankOnBoarding.mockResolvedValue(mockResponse);
+
+        await getBankOnBoarding(mockReq, mockRes);
+
+        expect(customersService.getBankOnBoarding).toHaveBeenCalledWith(mockReq.user);
+        expect(mockRes.status).toHaveBeenCalledWith(mockResponse.status);
+    });
+
+    //npm test -- customersController -t bankOnBoardingPayOff
+    it('should bankOnBoardingPayOff the user amount request', async () => {
+
+        let email_test = 'test@gmail.com'
+        const mockReq = {
+            user: {
+                email: email_test
+            },
+            body: {
+                amount: 10,
+                email: email_test
+            },
+        };
+
+        const mockRes = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+            send: jest.fn(),
+        };
+
+        const mockResponse = {
+            status: 200,
+            body: {
+            }
+        };
+
+        customersService.bankOnBoardingPayOff.mockResolvedValue(mockResponse);
+
+        await bankOnBoardingPayOff(mockReq, mockRes);
+
+        expect(customersService.bankOnBoardingPayOff).toHaveBeenCalledWith(mockReq.body);
         expect(mockRes.status).toHaveBeenCalledWith(mockResponse.status);
     });
 

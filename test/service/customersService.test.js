@@ -9,7 +9,10 @@ const {
     updateUser,
     deleteCustomers,
     getUserBalance,
-    validatePinCode
+    validatePinCode,
+    bankOnBoarding,
+    getBankOnBoarding,
+    bankOnBoardingPayOff
 } = require('../../service/customersService');
 const dynamoDBService = require('../../service/dynamoDBService');
 const bcrypt = require('bcryptjs');
@@ -28,6 +31,10 @@ const mockAxios = new MockAdapter(axios);
 const { Stripe } = require('stripe');
 
 describe('customersService', () => {
+
+    afterEach(() => {
+        mockAxios.reset();
+    });
 
     it('should send a verification email', async () => {
         const mockReq = {
@@ -839,7 +846,8 @@ describe('customersService', () => {
                 contractId: "4375dfbbdaff556d6f99a5cf",
                 projectId: "679ce380c4595d54f7c82a87d3274f8b",
                 email: "angelo.panichella@gmail.com"
-            }, email: "angelo.panichella@gmail.com",
+            },
+            email: "angelo.panichella@gmail.com",
             name: "angelo",
             language: "EN"
         };
@@ -896,6 +904,292 @@ describe('customersService', () => {
 
         expect(dynamoDBService.getCustomers).toHaveBeenCalledWith({ email: mockReq.email });
         expect(expectedResponse.status).toEqual(response.status)
+
+    });
+
+    //npm test -- customersService -t bankOnBoarding
+    it("should process the bankOnBoarding of user", async () => {
+
+        let accountLinkURL = "https://........."
+
+        const mockReq = {
+            email: 'test@example.com',
+        };
+
+        const mockRes = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+            send: jest.fn(),
+        };
+
+        const mockGetCustomers = {
+            email: 'test@example.com',
+        };
+
+        dynamoDBService.getCustomers.mockResolvedValue(mockGetCustomers);
+
+        //
+        const Accounts = jest.fn(() => (
+            {
+                acct_id: "12345678",
+            }
+        ));
+        Stripe.prototype.accounts = {
+            create: Accounts,
+        };
+        const AccountLinks = jest.fn(() => (
+            {
+                url: accountLinkURL,
+            }
+        ));
+        Stripe.prototype.accountLinks = {
+            create: AccountLinks,
+        };
+
+        let response = await bankOnBoarding(mockReq, mockRes);
+
+        expect(response.status).toBe(200);
+        expect(response.body.accountLink).toEqual(accountLinkURL)
+    });
+
+    //npm test -- customersService -t bankOnBoarding of user with stripeAccountId
+    it("should process the bankOnBoarding of user with stripeAccountId already exists and charges_enabled false", async () => {
+
+        let accountLinkURL = "https://........."
+
+        const mockReq = {
+            email: 'test@example.com',
+        };
+
+        const mockRes = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+            send: jest.fn(),
+        };
+
+        const mockGetCustomers = {
+            email: 'test@example.com',
+            stripeAccountId: '7bd4c63ba2cdadb060f5730e7bf66a30',
+        };
+
+        dynamoDBService.getCustomers.mockResolvedValue(mockGetCustomers);
+
+        //
+        const Accounts = jest.fn(() => (
+            {
+                acct_id: "12345678",
+                charges_enabled: false
+            }
+        ));
+        Stripe.prototype.accounts = {
+            retrieve: Accounts,
+        };
+        const AccountLinks = jest.fn(() => (
+            {
+                url: accountLinkURL,
+            }
+        ));
+        Stripe.prototype.accountLinks = {
+            create: AccountLinks,
+        };
+
+        let response = await bankOnBoarding(mockReq, mockRes);
+
+        expect(response.status).toBe(200);
+        expect(response.body.accountLink).toEqual(accountLinkURL)
+    });
+
+    //npm test -- customersService -t bankOnBoarding of user with stripeAccountId
+    it("should process the bankOnBoarding of user with stripeAccountId already exists and charges_enabled true", async () => {
+
+        let accountLinkURL = "https://........."
+
+        const mockReq = {
+            email: 'test@example.com',
+        };
+
+        const mockRes = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+            send: jest.fn(),
+        };
+
+        const mockGetCustomers = {
+            email: 'test@example.com',
+            stripeAccountId: '7bd4c63ba2cdadb060f5730e7bf66a30',
+        };
+
+        dynamoDBService.getCustomers.mockResolvedValue(mockGetCustomers);
+
+        //
+        const Accounts = jest.fn(() => (
+            {
+                acct_id: "12345678",
+                charges_enabled: true
+            }
+        ));
+        const AccountLinks = jest.fn(() => (
+            {
+                url: accountLinkURL,
+            }
+        ));
+        Stripe.prototype.accounts = {
+            retrieve: Accounts,
+            createLoginLink: AccountLinks
+        };
+
+        let response = await bankOnBoarding(mockReq, mockRes);
+
+        expect(response.status).toBe(200);
+        expect(response.body.accountLink).toEqual(accountLinkURL)
+    });
+
+    //npm test -- customersService -t getBankOnBoarding
+    it("should process the getBankOnBoarding of user", async () => {
+
+        const mockReq = {
+            email: 'test@example.com',
+        };
+
+        const mockRes = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+            send: jest.fn(),
+        };
+
+        const mockGetCustomers = {
+            email: 'test@example.com',
+            stripeAccountId: "fsdfkjsjkafhakj"
+        };
+
+        dynamoDBService.getCustomers.mockResolvedValue(mockGetCustomers);
+
+        //
+        const Accounts = jest.fn(() => (
+            {
+                acct_id: "12345678",
+                charges_enabled: true
+            }
+        ));
+        Stripe.prototype.accounts = {
+            retrieve: Accounts,
+        };
+
+        // Mock the Axios POST request
+        mockAxios.onPost().reply(200, {});
+
+        let response = await getBankOnBoarding(mockReq, mockRes);
+
+        expect(response.status).toBe(200);
+    });
+
+    //npm test -- customersService -t bankOnBoardingPayOff
+    it("should process the bankOnBoardingPayOff of user", async () => {
+
+        const mockReq = {
+            email: 'test@example.com',
+            amount: "20"
+        };
+
+        const mockRes = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+            send: jest.fn(),
+        };
+
+        const mockGetCustomers = {
+            email: 'test@example.com',
+            stripeAccountId: '7bd4c63ba2cdadb060f5730e7bf66a30',
+            accountAbstraction: {
+                walletId: "1a459690ac067b7a1ada813dd3356383",
+                privateKey: "0x2f0da9284853c5bec5d986718c0482e95627f4876b9962b45cd0fdd93e92c903",
+                address: "0x037A3089219e5D4c46d780A28699e55055C4B776",
+                aaAddres: "0xFaC346cD3105E052cEc7595F6203c41c9bfA9118",
+                contractId: "4375dfbbdaff556d6f99a5cf",
+                projectId: "679ce380c4595d54f7c82a87d3274f8b",
+                email: "angelo.panichella@gmail.com"
+            },
+        };
+
+        dynamoDBService.getCustomers.mockResolvedValue(mockGetCustomers);
+
+        //
+        const Transfers = jest.fn(() => (
+            {
+                acct_id: "12345678",
+                charges_enabled: true
+            }
+        ));
+        Stripe.prototype.transfers = {
+            create: Transfers,
+        };
+
+        // Mock the Axios POST request
+        mockAxios.onPost(/\/read-transaction$/).reply(200, [{
+            "tuple-0": "200"
+        }]);
+
+        // Mock the Axios POST request
+        mockAxios.onPost(/\/write-transaction$/).reply(200, {});
+
+        let response = await bankOnBoardingPayOff(mockReq, mockRes);
+
+        expect(response.status).toBe(200);
+    });
+
+    //npm test -- customersService -t "should process the bankOnBoardingPayOff of user exception"
+    it("should process the bankOnBoardingPayOff of user exception", async () => {
+
+        const mockReq = {
+            email: 'test@example.com',
+            amount: "4000"
+        };
+
+        const mockRes = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+            send: jest.fn(),
+        };
+
+        const mockGetCustomers = {
+            email: 'test@example.com',
+            stripeAccountId: '7bd4c63ba2cdadb060f5730e7bf66a30',
+            accountAbstraction: {
+                walletId: "1a459690ac067b7a1ada813dd3356383",
+                privateKey: "0x2f0da9284853c5bec5d986718c0482e95627f4876b9962b45cd0fdd93e92c903",
+                address: "0x037A3089219e5D4c46d780A28699e55055C4B776",
+                aaAddres: "0xFaC346cD3105E052cEc7595F6203c41c9bfA9118",
+                contractId: "4375dfbbdaff556d6f99a5cf",
+                projectId: "679ce380c4595d54f7c82a87d3274f8b",
+                email: "angelo.panichella@gmail.com"
+            },
+        };
+
+        dynamoDBService.getCustomers.mockResolvedValue(mockGetCustomers);
+
+        //
+        const Transfers = jest.fn(() => (
+            {
+                acct_id: "12345678",
+                charges_enabled: true
+            }
+        ));
+        Stripe.prototype.transfers = {
+            create: Transfers,
+        };
+
+        // Mock the Axios POST request
+        mockAxios.onPost(/\/read-transaction$/).reply(200, [{
+            "tuple-0": "200"
+        }]);
+
+        let exception
+        try {
+            await bankOnBoardingPayOff(mockReq, mockRes)
+        } catch (ex) {
+            exception = ex
+        }
+        expect(exception.message).toEqual("Insufficient amount!");
 
     });
 

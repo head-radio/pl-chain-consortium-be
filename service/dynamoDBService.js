@@ -73,7 +73,7 @@ const executeGet = async (params) => {
 
   let end = new Date()
   let diff = await utilityService.timeDifference(end, start)
-  console.log('executeGet > the difference in seconds is ' + diff)
+  //console.log('executeGet > the difference in seconds is ' + diff)
 
   if (response.error) {
     let error = new Error('db_connection_error')
