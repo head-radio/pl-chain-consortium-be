@@ -4,6 +4,7 @@ const errorCode = require('../enum/errorEnum')
 const utilityService = require('./utilityService')
 
 let plChainCustomersTable = "pl-chain-customers"
+let plChainSqsMessagesTable = "pl-chain-sqs-messages"
 
 const getCustomers = async (input) => {
 
@@ -11,6 +12,19 @@ const getCustomers = async (input) => {
     TableName: plChainCustomersTable,
     Key: {
       email: input.email
+    }
+  };
+
+  return await executeGet(params);
+
+};
+
+const getSqsMessages = async (input) => {
+
+  var params = {
+    TableName: plChainSqsMessagesTable,
+    Key: {
+      token: input.token
     }
   };
 
@@ -29,12 +43,36 @@ const insertCustomers = async (input) => {
 
 };
 
+const insertSqsMessages = async (input) => {
+
+  var params = {
+    TableName: plChainSqsMessagesTable,
+    Item: input
+  };
+
+  return await executeInsert(params);
+
+};
+
 const deleteCustomers = async (input) => {
 
   var params = {
     TableName: plChainCustomersTable,
     Key: {
       email: input.email
+    }
+  };
+
+  return await executeDelete(params);
+
+};
+
+const deleteSqsMessages = async (input) => {
+
+  var params = {
+    TableName: plChainSqsMessagesTable,
+    Key: {
+      token: input.token
     }
   };
 
@@ -168,6 +206,9 @@ const initDocClientConfig = async () => {
 
 module.exports = {
   getCustomers,
+  getSqsMessages,
   insertCustomers,
+  insertSqsMessages,
   deleteCustomers,
+  deleteSqsMessages
 };

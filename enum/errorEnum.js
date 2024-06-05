@@ -28,6 +28,7 @@ const errorEnum = {
     invalid_array_event: "1025",
     unexpected_error: "1026",
     customers_not_exists: "1027",
+    invalid_signature: "1028",
 };
 
 module.exports = {

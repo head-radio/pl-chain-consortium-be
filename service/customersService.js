@@ -45,7 +45,7 @@ const verifyEmailAddressAndSendEmail = async (request) => {
             request.codeVerification = codeVerification
 
             const tokenVerification = await tokenForVerify(request);
-            const emailUser = await utilityService.getProperty('EMAIL_USER')
+            const emailUser = await utilityService.getProperty(Constants.EMAIL_USER)
 
             const body = {
                 from: emailUser,
@@ -107,7 +107,7 @@ const validateEmailAndRegisterUser = async (request) => {
 
         if (request) {
 
-            const jwtSecret = await utilityService.getProperty('JWT_SECRET')
+            const jwtSecret = await utilityService.getProperty(Constants.JWT_SECRET)
 
             let promise = new Promise(function (resolve, reject) {
 
@@ -234,7 +234,7 @@ const resetPassword = async (request) => {
         const tokenVerification = await tokenForVerify(request);
         dynamoDBUser.passwordTokenVerification = tokenVerification
 
-        const emailUser = await utilityService.getProperty('EMAIL_USER')
+        const emailUser = await utilityService.getProperty(Constants.EMAIL_USER)
 
         const body = {
             from: emailUser,
@@ -296,7 +296,7 @@ const resetPasswordConfirm = async (request) => {
 
         if (request) {
 
-            const jwtSecret = await utilityService.getProperty('JWT_SECRET')
+            const jwtSecret = await utilityService.getProperty(Constants.JWT_SECRET)
 
             let promise = new Promise(function (resolve, reject) {
 
@@ -684,6 +684,9 @@ const bankOnBoardingPayOff = async (input) => {
 
         const stripeSecretKey = await utilityService.getProperty(Constants.STRIPE_SECRET_KEY)
         const stripe = Stripe(stripeSecretKey);
+
+        const consortiumBalanceAvailable = await stripe.balance.retrieve();
+        console.log("> consortiumBalanceAvailable", consortiumBalanceAvailable)
 
         let balanceResponse = await getUserBalance(input)
         console.log("> balance", JSON.stringify(balanceResponse))

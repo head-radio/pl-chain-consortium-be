@@ -3,9 +3,10 @@ const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const errorCode = require("../enum/errorEnum")
 const utilityService = require('./../service/utilityService')
+const Constants = require('./../utility/Constants')
 
 const signInToken = async (user) => {
-  const jwtSecret = await utilityService.getProperty('JWT_SECRET')
+  const jwtSecret = await utilityService.getProperty(Constants.JWT_SECRET)
   return jwt.sign(
     {
       _id: user._id,
@@ -25,7 +26,7 @@ const signInToken = async (user) => {
 };
 
 const userss2sTokenRegistration = async (userss2s) => {
-  const jwtSecret = await utilityService.getProperty('JWT_SECRET')
+  const jwtSecret = await utilityService.getProperty(Constants.JWT_SECRET)
   return jwt.sign(
     {
       _id: userss2s._id,
@@ -44,7 +45,7 @@ const userss2sTokenRegistration = async (userss2s) => {
 };
 
 const tokenForVerify = async (request) => {
-  const jwtSecret = await utilityService.getProperty('JWT_SECRET')
+  const jwtSecret = await utilityService.getProperty(Constants.JWT_SECRET)
   return jwt.sign(
     {
       name: request.name,
@@ -59,7 +60,7 @@ const tokenForVerify = async (request) => {
 
 const isAuth = async (req, res, next) => {
   const { authorization } = req.headers;
-  const jwtSecret = await utilityService.getProperty('JWT_SECRET')
+  const jwtSecret = await utilityService.getProperty(Constants.JWT_SECRET)
   req.authorization = authorization
   try {
     const token = authorization.split(' ')[1];
@@ -75,8 +76,8 @@ const isAuth = async (req, res, next) => {
 
 const sendEmail = async (body) => {
 
-  const emailUser = await utilityService.getProperty('EMAIL_USER')
-  const emailPass = await utilityService.getProperty('EMAIL_PASS')
+  const emailUser = await utilityService.getProperty(Constants.EMAIL_USER)
+  const emailPass = await utilityService.getProperty(Constants.EMAIL_PASS)
 
   const transporter = nodemailer.createTransport({
     host: process.env.HOST,

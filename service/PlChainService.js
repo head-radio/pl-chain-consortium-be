@@ -12,7 +12,7 @@ class PlChainService {
 
         let plChainBasePath = process.env.PL_CHAIN_BASE_PATH
         let plChainApiKey = await utilityService.getProperty(Constants.PL_CHAIN_API_KEY)
-        let plChainContractId = process.env.PL_CHAIN_CONTRACT_ID
+        let plChainContractId = process.env.PL_CHAIN_WALLET_FACTORY_CONTRACT_ID
         let plChainProjectId = process.env.PL_CHAIN_PROJECT_ID
         let plChainChain = process.env.PL_CHAIN_CHAIN
         let plChainEncryptedWalletKey = await utilityService.getProperty(Constants.PL_CHAIN_ENCRYPTED_WALLET_KEY)
@@ -534,9 +534,11 @@ class PlChainService {
                     projectId: plChainProjectId,
                     contractId: plChainConsortiumContractId,
                     payload: {
-                        function: "getTransactionsByAddress",
+                        function: "getUserTransactionsAndPagination",
                         inputsValue: [
-                            input.address
+                            input.address,
+                            input.page,
+                            input.itemsPerPage
                         ]
                     }
                 },

@@ -1,5 +1,8 @@
 require('aws-sdk/lib/maintenance_mode_message').suppress = true;
 const secretsManager = require('./secretsManager')
+const jwt = require('jsonwebtoken');
+const Constants = require('./../utility/Constants')
+const errorCode = require('../enum/errorEnum')
 
 const isValidEmail = async (email) => {
   return String(email)
@@ -55,11 +58,62 @@ const getProperty = async (input) => {
 
 }
 
+const generateTokenFromInput = async (request) => {
+  const jwtSecret = await getProperty(Constants.JWT_SECRET)
+  return jwt.sign(
+    request,
+    jwtSecret,
+    { expiresIn: '2d' }
+  );
+};
+
+const verifyToken = async (token) => {
+
+  const jwtSecret = await getProperty(Constants.JWT_SECRET)
+
+  let promise = new Promise(function (resolve, reject) {
+
+    jwt.verify(token, jwtSecret, async (err, decoded) => {
+
+      if (err) {
+
+        let error = new Error(err.message)
+        error.status = 400
+        error.error_code = errorCode.errorEnum.invalid_signature;
+        reject(error)
+        return
+
+      }
+
+      resolve(decoded)
+
+    });
+
+  })
+
+  let responseReturn;
+  let errorReturn;
+
+  await promise.then(
+    async result => {
+      responseReturn = result
+    },
+    error => {
+      errorReturn = error
+    }
+  );
+
+  return [responseReturn, errorReturn]
+
+}
+
 module.exports = {
   isValidEmail,
   timeDifference,
   isObjEmpty,
   isNotObjEmpty,
   formattedTimestamp,
-  getProperty
+  getProperty,
+  generateTokenFromInput,
+  verifyToken
 };

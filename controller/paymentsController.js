@@ -24,6 +24,31 @@ const paymentsRechargeCheckoutSession = async (req, res) => {
 
 }
 
+const paymentsRechargeByToken = async (req, res) => {
+
+    // #swagger.tags = ['Payments']
+    // #swagger.description = 'API to execute a recharge by SQS queue.'
+
+    let token = req.params.token
+    let payload = req.body
+
+    try {
+        console.log("> paymentsRechargeByToken - token", token)
+        console.log("> paymentsRechargeByToken - payload", payload)
+        let response = await paymentsService.paymentsRechargeByToken({
+            token: token,
+            payload: payload
+        })
+        res.status(response.status).json(response.body)
+    } catch (exception) {
+        res.status(exception.status).send({
+            error_code: exception.error_code,
+            message: exception.message,
+        });
+    }
+
+}
+
 const paymentTransferToken = async (req, res) => {
 
     // #swagger.tags = ['Payments']
@@ -106,8 +131,12 @@ const getPaymentTransactions = async (req, res) => {
 
     let address = req.params.address
 
+    const { page, itemsPerPage } = req.query;
+
     let response = await paymentsService.getPaymentTransactions({
         address: address,
+        page: page,
+        itemsPerPage: itemsPerPage
     })
     res.status(response.status).json(response.body)
 
@@ -115,6 +144,7 @@ const getPaymentTransactions = async (req, res) => {
 
 module.exports = {
     paymentsRechargeCheckoutSession,
+    paymentsRechargeByToken,
     paymentTransferToken,
     getPaymentTransferToken,
     getUserOperationOfPaymentTransferToken,

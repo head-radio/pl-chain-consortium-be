@@ -206,6 +206,10 @@ describe('paymentsController', () => {
         const mockReq = {
             params: {
                 address: "0xgd5fg4d654g65gretew6",
+            },
+            query: {
+                page: 1,
+                itemsPerPage: 20
             }
         };
 

@@ -4,6 +4,8 @@ const utilityService = require('./utilityService')
 const customersService = require('./customersService')
 const Constants = require('./../utility/Constants')
 const PlChainService = require('./PlChainService')
+const sqsService = require('./sqsService')
+const dynamoDBService = require('./dynamoDBService')
 
 const createStripeCheckoutSession = async (request) => {
 
@@ -29,14 +31,14 @@ const createStripeCheckoutSession = async (request) => {
             metadata: {
                 email: customer.body.email,
                 aaAddress: customer.body.accountAbstraction.aaAddress,
-                walletId: customer.body.accountAbstraction.walletId
+                walletId: customer.body.accountAbstraction.walletId,
+                token: await utilityService.generateTokenFromInput(request)
             }
         });
 
         let response = {
             status: 200,
             body: {
-                publishableKey: process.env.publishable_key,
                 paymentIntent: paymentIntent.client_secret,
                 customer: customer.body.stripeCustomerId,
                 ephemeralKey: ephemeralKey.secret
@@ -54,6 +56,52 @@ const createStripeCheckoutSession = async (request) => {
         throw exception;
 
     }
+}
+
+const paymentsRechargeByToken = async (input) => {
+
+    let status = 400
+    let isTransferSuccess = false
+
+    console.log("> paymentsRechargeByToken", input)
+    let objectSaved = await dynamoDBService.getSqsMessages({ token: input.token })
+    console.log("> paymentsRechargeByToken - objectSaved", objectSaved)
+
+    // check if token session is already exists in the database
+    if (objectSaved?.processed) {
+        let exception = new Object()
+        exception.status = exception.status || 400
+        exception.error_code = errorCode.errorEnum.invalid_data;
+        exception.message = "token already processed"
+        throw exception
+    }
+
+    // transfer token if only a charge.succeeded
+    if (input?.payload?.type == "charge.succeeded") {
+        let plChainService = new PlChainService()
+        let rechargeTransferTokenResponse = await plChainService.rechargeTransferToken({
+            aaAddress: input.payload.data.object.metadata.aaAddress,
+            amount: input.payload.data.object.amount
+        })
+        console.log('rechargeTransferTokenResponse', rechargeTransferTokenResponse)
+
+        isTransferSuccess = (rechargeTransferTokenResponse.status == 200)
+        status = rechargeTransferTokenResponse.status
+
+        input.payload.processed = true
+        dynamoDBService.insertSqsMessages(input.payload)
+    }
+
+    let response = {
+        status: status,
+        body: {
+            isTransferSuccess: isTransferSuccess,
+            info: input?.payload?.type
+        }
+    }
+
+    return response
+
 }
 
 const paymentTransferToken = async (input) => {
@@ -132,28 +180,45 @@ const getUserOperationOfPaymentTransferToken = async (input) => {
 
 const paymentsRechargeCallback = async (input) => {
 
-    let isTransferSuccess = false
-    let status = 400
+    console.log("> start paymentsRechargeCallback ...")
 
-    // TODO: calculate stripe signature to avoid recharge attack
-    if (input.type == "charge.succeeded") {
-        let plChainService = new PlChainService()
-        let rechargeTransferTokenResponse = await plChainService.rechargeTransferToken({
-            aaAddress: input.data.object.metadata.aaAddress,
-            amount: input.data.object.amount
-        })
-        console.log('rechargeTransferTokenResponse', rechargeTransferTokenResponse)
+    let token = input.data.object.metadata.token
+    const [responseVerifier, errorVerifier] = await utilityService.verifyToken(token)
 
-        isTransferSuccess = (rechargeTransferTokenResponse.status == 200)
-        status = rechargeTransferTokenResponse.status
+    // check correct signature
+    if (errorVerifier) {
+        console.error("errorVerifier", errorVerifier)
+        let exception = new Object()
+        exception.status = exception.status || 400
+        exception.error_code = errorCode.errorEnum.invalid_signature;
+        exception.message = errorVerifier
+        throw exception;
     }
 
+    console.log("> before retrieve token sqs")
+    let objectSaved = await dynamoDBService.getSqsMessages({ token: token })
+    console.log("> after retrieve token sqs", objectSaved)
+
+    // check if token session is already exists in the database
+    if (objectSaved?.processed) {
+        let exception = new Object()
+        exception.status = exception.status || 400
+        exception.error_code = errorCode.errorEnum.invalid_data;
+        exception.message = "token already processed"
+        throw exception;
+    }
+
+    // push data on a queue
+    input.token = token
+    let pushOnQueueData = await sqsService.pushOnQueue(input);
+    // take messageId of the push
+    input.MessageId = pushOnQueueData.MessageId
+
+    //save data on database
+    dynamoDBService.insertSqsMessages(input)
+
     let response = {
-        status: status,
-        body: {
-            isTransferSuccess: isTransferSuccess,
-            info: input.type
-        }
+        status: 200
     }
 
     return response
@@ -165,6 +230,8 @@ const getPaymentTransactions = async (input) => {
     let plChainService = new PlChainService()
     let getPaymentTransactionsResponse = await plChainService.getPaymentTransactions({
         address: input.address,
+        page: input.page,
+        itemsPerPage: input.itemsPerPage
     })
     console.log('getPaymentTransactions', getPaymentTransactionsResponse)
 
@@ -179,6 +246,7 @@ const getPaymentTransactions = async (input) => {
 
 module.exports = {
     createStripeCheckoutSession,
+    paymentsRechargeByToken,
     paymentTransferToken,
     getPaymentTransferToken,
     getUserOperationOfPaymentTransferToken,

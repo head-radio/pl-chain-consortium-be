@@ -1124,6 +1124,15 @@ describe('customersService', () => {
             create: Transfers,
         };
 
+        const Balance = jest.fn(() => (
+            {
+                balance : 100
+            }
+        ));
+        Stripe.prototype.balance = {
+            retrieve: Balance,
+        };
+
         // Mock the Axios POST request
         mockAxios.onPost(/\/read-transaction$/).reply(200, [{
             "tuple-0": "200"
