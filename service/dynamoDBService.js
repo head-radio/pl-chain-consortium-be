@@ -5,6 +5,7 @@ const utilityService = require('./utilityService')
 
 let plChainCustomersTable = "pl-chain-customers"
 let plChainSqsMessagesTable = "pl-chain-sqs-messages"
+let plChainCircuitsTable = "pl-chain-circuits"
 
 const getCustomers = async (input) => {
 
@@ -32,6 +33,29 @@ const getSqsMessages = async (input) => {
 
 };
 
+const getCircuits = async (input) => {
+
+  var params = {
+    TableName: plChainCircuitsTable,
+    Key: {
+      tokenLayerAddress: input.tokenLayerAddress
+    }
+  };
+
+  return await executeGet(params);
+
+};
+
+const getAllCircuits = async () => {
+
+  var params = {
+    TableName: plChainCircuitsTable,
+  };
+
+  return await executeScan(params);
+
+};
+
 const insertCustomers = async (input) => {
 
   var params = {
@@ -47,6 +71,17 @@ const insertSqsMessages = async (input) => {
 
   var params = {
     TableName: plChainSqsMessagesTable,
+    Item: input
+  };
+
+  return await executeInsert(params);
+
+};
+
+const insertCircuits = async (input) => {
+
+  var params = {
+    TableName: plChainCircuitsTable,
     Item: input
   };
 
@@ -73,6 +108,19 @@ const deleteSqsMessages = async (input) => {
     TableName: plChainSqsMessagesTable,
     Key: {
       token: input.token
+    }
+  };
+
+  return await executeDelete(params);
+
+};
+
+const deleteCircuits = async (input) => {
+
+  var params = {
+    TableName: plChainCircuitsTable,
+    Key: {
+      tokenLayerAddress: input.tokenLayerAddress
     }
   };
 
@@ -124,6 +172,50 @@ const executeGet = async (params) => {
   return response
 
 }
+
+const executeScan = async (params) => {
+
+  let start = new Date()
+
+  let response = new Object()
+
+  let promiseGet = new Promise(async function (resolve, reject) {
+    let docClient = await initDocClientConfig()
+    docClient.scan(params, function (err, data) {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(data);
+      }
+    });
+  });
+
+  await promiseGet.then(
+    result => {
+      response = new Object(result.Items)
+    },
+    error => {
+      console.error(error)
+      response.error = error
+    }
+  );
+
+  let end = new Date()
+  let diff = await utilityService.timeDifference(end, start)
+  //console.log('executeGet > the difference in seconds is ' + diff)
+
+  if (response.error) {
+    let error = new Error('db_connection_error')
+    error.error_code = errorCode.errorEnum.db_connection_error;
+    error.message = response.error
+    error.status = 500
+    throw error;
+  }
+
+  return response
+
+}
+
 
 const executeInsert = async (params) => {
 
@@ -207,8 +299,12 @@ const initDocClientConfig = async () => {
 module.exports = {
   getCustomers,
   getSqsMessages,
+  getCircuits,
+  getAllCircuits,
   insertCustomers,
   insertSqsMessages,
+  insertCircuits,
   deleteCustomers,
-  deleteSqsMessages
+  deleteSqsMessages,
+  deleteCircuits
 };

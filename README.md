@@ -14,13 +14,14 @@ You can see the backend API on <a href="https://api-consortium.pl-chain.com/v1/a
 ## Requirements
 
 * Git
-* Node 16
+* Node 20
 * Express.js
 * AWS Lambda
 * AWS DynamoDB
 * AWS Secrets Manager
 * AWS IAM Role
 * AWS Route53
+* AWS SQS
 
 ## Common setup
 
@@ -51,6 +52,8 @@ After running DynamoDB locally, execute the commando below to create the custome
 
 ```bash
 aws dynamodb --endpoint-url http://localhost:8000 --region eu-south-1 create-table --table-name pl-chain-customers --attribute-definitions AttributeName=email,AttributeType=S --key-schema AttributeName=email,KeyType=HASH --provisioned-throughput ReadCapacityUnits=1,WriteCapacityUnits=1
+
+aws dynamodb --endpoint-url http://localhost:8000 --region eu-south-1 create-table --table-name pl-chain-circuits --attribute-definitions AttributeName=tokenLayerAddress,AttributeType=S --key-schema AttributeName=tokenLayerAddress,KeyType=HASH --provisioned-throughput ReadCapacityUnits=1,WriteCapacityUnits=1
 ```
 
 ## Local configuration

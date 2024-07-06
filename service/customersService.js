@@ -450,6 +450,10 @@ const updateUser = async (request) => {
         user.stripeAccountId = request.stripeAccountId
     }
 
+    if (request.tokenLayerAddress != null) {
+        user.tokenLayerAddress = request.tokenLayerAddress
+    }
+
     await dynamoDBService.insertCustomers(user)
 
     let userObj = new Object({
@@ -458,7 +462,8 @@ const updateUser = async (request) => {
         language: user.language,
         enablePush: user.enablePush,
         enableFingerprint: user.enableFingerprint,
-        pinCodeValidation: user.pinCodeValidation
+        pinCodeValidation: user.pinCodeValidation,
+        tokenLayerAddress: user.tokenLayerAddress
     })
 
     let response = {

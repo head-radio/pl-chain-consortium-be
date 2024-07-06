@@ -6,7 +6,8 @@ const {
     getPaymentTransferToken,
     getUserOperationOfPaymentTransferToken,
     paymentsRechargeCallback,
-    getPaymentTransactions
+    getPaymentTransactions,
+    paymentsRechargeByToken
 } = require('../../controller/paymentsController');
 
 paymentsService.createStripeCheckoutSession = jest.fn()
@@ -15,6 +16,7 @@ paymentsService.getPaymentTransferToken = jest.fn()
 paymentsService.getUserOperationOfPaymentTransferToken = jest.fn()
 paymentsService.paymentsRechargeCallback = jest.fn()
 paymentsService.getPaymentTransactions = jest.fn()
+paymentsService.paymentsRechargeByToken = jest.fn()
 
 describe('paymentsController', () => {
 
@@ -39,12 +41,12 @@ describe('paymentsController', () => {
         const mockResponse = {
             status: 200,
             body:
-            {
-                publishableKey: "publishableKey",
-                paymentIntent: "paymentIntent.client_secret",
-                customer: "customer.id",
-                ephemeralKey: "ephemeralKey.secret"
-            },
+                {
+                    publishableKey: "publishableKey",
+                    paymentIntent: "paymentIntent.client_secret",
+                    customer: "customer.id",
+                    ephemeralKey: "ephemeralKey.secret"
+                },
         };
 
         paymentsService.createStripeCheckoutSession.mockResolvedValue(mockResponse);
@@ -84,8 +86,7 @@ describe('paymentsController', () => {
         const mockServiceResponse = {
             status: 200,
             body:
-            {
-            },
+                {},
         };
 
         paymentsService.paymentTransferToken.mockResolvedValue(mockServiceResponse);
@@ -113,10 +114,10 @@ describe('paymentsController', () => {
         const mockServiceResponse = {
             status: 200,
             body:
-            {
-                payed: true,
-                ipfsURI: 'ipfs://...'
-            },
+                {
+                    payed: true,
+                    ipfsURI: 'ipfs://...'
+                },
         };
 
         paymentsService.getPaymentTransferToken.mockResolvedValue(mockServiceResponse);
@@ -145,8 +146,7 @@ describe('paymentsController', () => {
         const mockServiceResponse = {
             status: 200,
             body:
-            {
-            },
+                {},
         };
 
         paymentsService.getUserOperationOfPaymentTransferToken.mockResolvedValue(mockServiceResponse);
@@ -170,7 +170,7 @@ describe('paymentsController', () => {
                         metadata: {
                             walletId: "969171fc9073e407cf72957cc49e3892",
                             aaAddress: "0xe3F34B3883636D9a23dd694B15a14c97602A73b6",
-                            email: "angelo.panichella@gmail.com"
+                            email: "test@gmail.com"
                         },
                     }
                 },
@@ -187,10 +187,10 @@ describe('paymentsController', () => {
         const mockResponse = {
             status: 200,
             body:
-            {
-                isTransferSuccess: true,
-                info: "charge.succeeded"
-            },
+                {
+                    isTransferSuccess: true,
+                    info: "charge.succeeded"
+                },
         };
 
         paymentsService.paymentsRechargeCallback.mockResolvedValue(mockResponse);
@@ -221,8 +221,7 @@ describe('paymentsController', () => {
 
         const mockServiceResponse = {
             status: 200,
-            body: {
-            },
+            body: {},
         };
 
         paymentsService.getPaymentTransactions.mockResolvedValue(mockServiceResponse);
@@ -232,4 +231,33 @@ describe('paymentsController', () => {
         expect(mockRes.status).toHaveBeenCalledWith(mockServiceResponse.status);
 
     })
+
+    it('should paymentsRechargeByToken', async () => {
+
+        const mockReq = {
+            params: {
+                token:"fdsljfksfskdjf"
+            },
+            body: {
+                payload: {}
+            }
+        };
+
+        const mockRes = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+            send: jest.fn(),
+        };
+
+        const mockResponse = {
+            status: 200,
+        };
+
+        paymentsService.paymentsRechargeByToken.mockResolvedValue(mockResponse);
+
+        await paymentsRechargeByToken(mockReq, mockRes);
+        expect(mockRes.status).toHaveBeenCalledWith(mockResponse.status);
+
+    })
+
 });

@@ -29,6 +29,7 @@ const errorEnum = {
     unexpected_error: "1026",
     customers_not_exists: "1027",
     invalid_signature: "1028",
+    invalid_blockchain_address: "1029",
 };
 
 module.exports = {

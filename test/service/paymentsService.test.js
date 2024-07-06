@@ -93,7 +93,7 @@ describe("paymentsService", () => {
                         metadata: {
                             walletId: "969171fc9073e407cf72957cc49e3892",
                             aaAddress: "0xe3F34B3883636D9a23dd694B15a14c97602A73b6",
-                            email: "angelo.panichella@gmail.com"
+                            email: "test@gmail.com"
                         },
                     }
                 },
@@ -125,7 +125,7 @@ describe("paymentsService", () => {
                     metadata: {
                         walletId: "969171fc9073e407cf72957cc49e3892",
                         aaAddress: "0xe3F34B3883636D9a23dd694B15a14c97602A73b6",
-                        email: "angelo.panichella@gmail.com"
+                        email: "test@gmail.com"
                     },
                 }
             },
@@ -158,7 +158,7 @@ describe("paymentsService", () => {
                     metadata: {
                         walletId: "969171fc9073e407cf72957cc49e3892",
                         aaAddress: "0xe3F34B3883636D9a23dd694B15a14c97602A73b6",
-                        email: "angelo.panichella@gmail.com"
+                        email: "test@gmail.com"
                     },
                 }
             },
@@ -189,7 +189,7 @@ describe("paymentsService", () => {
                     metadata: {
                         walletId: "969171fc9073e407cf72957cc49e3892",
                         aaAddress: "0xe3F34B3883636D9a23dd694B15a14c97602A73b6",
-                        email: "angelo.panichella@gmail.com"
+                        email: "test@gmail.com"
                     },
                 }
             },
@@ -219,7 +219,7 @@ describe("paymentsService", () => {
                     metadata: {
                         walletId: "969171fc9073e407cf72957cc49e3892",
                         aaAddress: "0xe3F34B3883636D9a23dd694B15a14c97602A73b6",
-                        email: "angelo.panichella@gmail.com"
+                        email: "test@gmail.com"
                     },
                 }
             },

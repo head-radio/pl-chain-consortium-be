@@ -128,7 +128,8 @@ const updateUser = async (req, res) => {
             name: req.body.name,
             enablePush: req.body.enablePush,
             enableFingerprint: req.body.enableFingerprint,
-            pinCodeValidation: req.body.pinCodeValidation
+            pinCodeValidation: req.body.pinCodeValidation,
+            tokenLayerAddress: req.body.tokenLayerAddress
         })
         res.status(response.status).send(response.body)
     } catch (exception) {

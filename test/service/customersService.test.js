@@ -845,10 +845,10 @@ describe('customersService', () => {
                 aaAddres: "0xFaC346cD3105E052cEc7595F6203c41c9bfA9118",
                 contractId: "4375dfbbdaff556d6f99a5cf",
                 projectId: "679ce380c4595d54f7c82a87d3274f8b",
-                email: "angelo.panichella@gmail.com"
+                email: "test@gmail.com"
             },
-            email: "angelo.panichella@gmail.com",
-            name: "angelo",
+            email: "test@gmail.com",
+            name: "test",
             language: "EN"
         };
 
@@ -1107,7 +1107,7 @@ describe('customersService', () => {
                 aaAddres: "0xFaC346cD3105E052cEc7595F6203c41c9bfA9118",
                 contractId: "4375dfbbdaff556d6f99a5cf",
                 projectId: "679ce380c4595d54f7c82a87d3274f8b",
-                email: "angelo.panichella@gmail.com"
+                email: "test@gmail.com"
             },
         };
 
@@ -1170,7 +1170,7 @@ describe('customersService', () => {
                 aaAddres: "0xFaC346cD3105E052cEc7595F6203c41c9bfA9118",
                 contractId: "4375dfbbdaff556d6f99a5cf",
                 projectId: "679ce380c4595d54f7c82a87d3274f8b",
-                email: "angelo.panichella@gmail.com"
+                email: "test@gmail.com"
             },
         };
 

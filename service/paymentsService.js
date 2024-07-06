@@ -69,7 +69,7 @@ const paymentsRechargeByToken = async (input) => {
 
     // check if token session is already exists in the database
     if (objectSaved?.processed) {
-        let exception = new Object()
+        let exception = {}
         exception.status = exception.status || 400
         exception.error_code = errorCode.errorEnum.invalid_data;
         exception.message = "token already processed"
@@ -77,7 +77,7 @@ const paymentsRechargeByToken = async (input) => {
     }
 
     // transfer token if only a charge.succeeded
-    if (input?.payload?.type == "charge.succeeded") {
+    if (input?.payload?.type === "charge.succeeded") {
         let plChainService = new PlChainService()
         let rechargeTransferTokenResponse = await plChainService.rechargeTransferToken({
             aaAddress: input.payload.data.object.metadata.aaAddress,
@@ -85,22 +85,20 @@ const paymentsRechargeByToken = async (input) => {
         })
         console.log('rechargeTransferTokenResponse', rechargeTransferTokenResponse)
 
-        isTransferSuccess = (rechargeTransferTokenResponse.status == 200)
+        isTransferSuccess = (rechargeTransferTokenResponse.status === 200)
         status = rechargeTransferTokenResponse.status
 
         input.payload.processed = true
         dynamoDBService.insertSqsMessages(input.payload)
     }
 
-    let response = {
+    return {
         status: status,
         body: {
             isTransferSuccess: isTransferSuccess,
             info: input?.payload?.type
         }
     }
-
-    return response
 
 }
 
@@ -114,7 +112,7 @@ const paymentTransferToken = async (input) => {
         let generatePaymentTransferTokenSessionResponse = await plChainService.generatePaymentTransferTokenSession(input)
         console.log('generatePaymentTransferTokenSessionResponse', generatePaymentTransferTokenSessionResponse)
 
-        if (generatePaymentTransferTokenSessionResponse.status != 200) {
+        if (generatePaymentTransferTokenSessionResponse.status !== 200) {
             response = {
                 status: generatePaymentTransferTokenSessionResponse.status,
                 body: generatePaymentTransferTokenSessionResponse.body

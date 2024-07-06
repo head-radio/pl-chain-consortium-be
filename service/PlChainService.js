@@ -8,7 +8,7 @@ class PlChainService {
 
     async createAccountAbstraction() {
 
-        let responseG = new Object()
+        let responseG = {}
 
         let plChainBasePath = process.env.PL_CHAIN_BASE_PATH
         let plChainApiKey = await utilityService.getProperty(Constants.PL_CHAIN_API_KEY)
@@ -67,7 +67,7 @@ class PlChainService {
 
     async getUserBalance(address) {
 
-        let responseG = new Object()
+        let responseG = {}
 
         console.log('> getUserBalance')
 
@@ -135,7 +135,7 @@ class PlChainService {
     async rechargeTransferToken(input) {
 
         console.log("> start rechargeTransferToken with input", JSON.stringify(input))
-        let responseG = new Object()
+        let responseG = {}
 
         let plChainBasePath = process.env.PL_CHAIN_BASE_PATH
         let plChainApiKey = await utilityService.getProperty(Constants.PL_CHAIN_API_KEY)
@@ -204,7 +204,7 @@ class PlChainService {
     async payOffBurnToken(input) {
 
         console.log("> start payOffBurnToken with input", JSON.stringify(input))
-        let responseG = new Object()
+        let responseG = {}
 
         let plChainBasePath = process.env.PL_CHAIN_BASE_PATH
         let plChainApiKey = await utilityService.getProperty(Constants.PL_CHAIN_API_KEY)
@@ -273,7 +273,7 @@ class PlChainService {
     async generatePaymentTransferTokenSession(input) {
 
         console.log("> start generatePaymentTransferTokenSession with input", JSON.stringify(input))
-        let responseG = new Object()
+        let responseG = {}
 
         let plChainBasePath = process.env.PL_CHAIN_BASE_PATH
         let plChainApiKey = await utilityService.getProperty(Constants.PL_CHAIN_API_KEY)
@@ -339,12 +339,12 @@ class PlChainService {
 
     async executeUserOperation(input) {
 
-        let responseG = new Object()
+        let responseG = {}
 
         let plChainBasePath = process.env.PL_CHAIN_BASE_PATH
         let plChainApiKey = await utilityService.getProperty(Constants.PL_CHAIN_API_KEY)
         let plChainChain = process.env.PL_CHAIN_CHAIN
-        let plChainpaymasterContractId = process.env.PL_CHAIN_PAYMASTER_CONTRACT_ID
+        let plChainPaymasterContractId = process.env.PL_CHAIN_PAYMASTER_CONTRACT_ID
 
         let promise = new Promise((resolve, reject) => {
             axios.post(
@@ -352,7 +352,7 @@ class PlChainService {
                 {
                     walletId: input.walletId,
                     sessionId: input.sessionId,
-                    paymasterContractId: plChainpaymasterContractId
+                    paymasterContractId: plChainPaymasterContractId
                 },
                 {
                     headers: {
@@ -397,7 +397,7 @@ class PlChainService {
     async getPaymentTransferToken(input) {
 
         console.log("> start getPaymentTransferToken with input", JSON.stringify(input))
-        let responseG = new Object()
+        let responseG = {}
 
         let plChainBasePath = process.env.PL_CHAIN_BASE_PATH
         let plChainApiKey = await utilityService.getProperty(Constants.PL_CHAIN_API_KEY)
@@ -463,7 +463,7 @@ class PlChainService {
     async getUserOperationReceipt(input) {
 
         console.log("> start getUserOperationReceipt with input", JSON.stringify(input))
-        let responseG = new Object()
+        let responseG = {}
 
         let plChainBasePath = process.env.PL_CHAIN_BASE_PATH
         let plChainApiKey = await utilityService.getProperty(Constants.PL_CHAIN_API_KEY)
@@ -518,7 +518,7 @@ class PlChainService {
     async getPaymentTransactions(input) {
 
         console.log("> start getPaymentTransactions with input", JSON.stringify(input))
-        let responseG = new Object()
+        let responseG = {}
 
         let plChainBasePath = process.env.PL_CHAIN_BASE_PATH
         let plChainApiKey = await utilityService.getProperty(Constants.PL_CHAIN_API_KEY)
@@ -586,7 +586,7 @@ class PlChainService {
     async getNFTs(input) {
 
         console.log("> start getNFTs with input", JSON.stringify(input))
-        let responseG = new Object()
+        let responseG = {}
 
         let plChainBasePath = process.env.PL_CHAIN_BASE_PATH
         let plChainApiKey = await utilityService.getProperty(Constants.PL_CHAIN_API_KEY)
@@ -655,7 +655,7 @@ class PlChainService {
     async generateNFTTransferSession(input) {
 
         console.log("> start generateNFTTransferSession with input", JSON.stringify(input))
-        let responseG = new Object()
+        let responseG = {}
 
         let plChainBasePath = process.env.PL_CHAIN_BASE_PATH
         let plChainApiKey = await utilityService.getProperty(Constants.PL_CHAIN_API_KEY)
@@ -723,7 +723,7 @@ class PlChainService {
     async uploadFileToIPFS(input) {
 
         console.log("> start uploadFileToIPFS with input", JSON.stringify(input))
-        let responseG = new Object()
+        let responseG = {}
 
         let plChainBasePath = process.env.PL_CHAIN_BASE_PATH
         let plChainApiKey = await utilityService.getProperty(Constants.PL_CHAIN_API_KEY)
@@ -781,7 +781,7 @@ class PlChainService {
     async uploadFileToIPFSMultipart(input) {
 
         console.log("> start uploadFileToIPFSMultipart with input", input)
-        let responseG = new Object()
+        let responseG = {}
 
         let plChainBasePath = process.env.PL_CHAIN_BASE_PATH
         let plChainApiKey = await utilityService.getProperty(Constants.PL_CHAIN_API_KEY)
@@ -841,7 +841,7 @@ class PlChainService {
     async uploadMetadataToIPFS(input) {
 
         console.log("> start uploadMetadataToIPFS with input", JSON.stringify(input))
-        let responseG = new Object()
+        let responseG = {}
 
         let plChainBasePath = process.env.PL_CHAIN_BASE_PATH
         let plChainApiKey = await utilityService.getProperty(Constants.PL_CHAIN_API_KEY)
@@ -896,7 +896,7 @@ class PlChainService {
     async generateNFTCreationSession(input) {
 
         console.log("> start generateNFTCreationSession with input", JSON.stringify(input))
-        let responseG = new Object()
+        let responseG = {}
 
         let plChainBasePath = process.env.PL_CHAIN_BASE_PATH
         let plChainApiKey = await utilityService.getProperty(Constants.PL_CHAIN_API_KEY)

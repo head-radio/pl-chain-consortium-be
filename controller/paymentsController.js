@@ -61,6 +61,7 @@ const paymentTransferToken = async (req, res) => {
     let ipfsURI = req.body.ipfsURI
     let nonce = req.body.nonce
     let name = req.body.name
+    let payed = req.body.payed
 
     try {
         let response = await paymentsService.paymentTransferToken({
